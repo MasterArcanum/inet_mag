@@ -1,0 +1,89 @@
+{% extends "layout.html" %}
+
+{% block title %}Просмотр товара{% endblock %}
+
+{% block content %}
+  {% include 'navbar.html' %}
+  <div class="container mx-auto my-8 px-4">
+    <!-- Заголовок и кнопка "Назад" -->
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-4xl font-bold text-gray-800"></h1>
+      <a href="{{ url_for('manage_products') }}" class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors duration-300">
+        Назад
+      </a>
+    </div>
+
+    <!-- Карточка товара -->
+    <div class="bg-white rounded-lg shadow-2xl overflow-hidden">
+      <div class="flex flex-col md:flex-row">
+        <!-- Левая колонка: изображение товара -->
+        <div class="md:w-1/2">
+          {% set preview_files = product_files | selectattr("file_type", "in", ["image/jpeg", "image/jpg", "image/png", "image/webp"]) | list %}
+          {% if preview_files|length > 0 %}
+            {% set preview_file = preview_files[0] %}
+            <img class="w-full h-96 object-cover" src="data:{{ preview_file.file_type }};base64,{{ preview_file.data_base64 }}" alt="{{ product.name }}">
+          {% else %}
+            <div class="w-full h-96 bg-gray-200 flex items-center justify-center">
+              <span class="text-gray-500">Нет изображения</span>
+            </div>
+          {% endif %}
+        </div>
+
+        <!-- Правая колонка: информация о товаре -->
+        <div class="md:w-1/2 p-6 flex flex-col justify-between">
+          <div>
+            <h2 class="text-3xl font-bold text-gray-800 mb-3">{{ product.name }}</h2>
+            <p class="text-gray-700 text-lg mb-4">{{ product.description }}</p>
+          </div>
+          <div class="flex items-center justify-between">
+            <span class="text-green-800 font-semibold text-2xl">₽{{ product.price }}</span>
+            <span class="text-gray-600 text-lg">В наличии: {{ product.stock }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Нижняя панель с кнопкой "Добавить в корзину" -->
+      <div class="px-6 py-4 bg-gray-100 border-t flex justify-end">
+        <button class="flex items-center bg-green-800 text-white px-6 py-3 rounded-full hover:bg-green-700 transition-colors duration-300">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
+          </svg>
+          <span>Добавить в корзину</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Блок дополнительных преимуществ товара (опционально) -->
+    <div class="flex flex-col md:flex-row md:space-x-6 mt-12 text-center md:text-left">
+      <div class="flex-1 mb-4 md:mb-0">
+        <div class="text-2xl text-green-600 mb-2">
+          <i class="fa fa-check-circle" aria-hidden="true"></i>
+        </div>
+        <h3 class="font-bold text-lg">Гарантия качества</h3>
+        <p class="text-gray-600">Проверенные поставщики</p>
+      </div>
+      <div class="flex-1 mb-4 md:mb-0">
+        <div class="text-2xl text-green-600 mb-2">
+          <i class="fa fa-truck" aria-hidden="true"></i>
+        </div>
+        <h3 class="font-bold text-lg">Бесплатная доставка</h3>
+        <p class="text-gray-600">При заказе от 3000 руб.</p>
+      </div>
+      <div class="flex-1 mb-4 md:mb-0">
+        <div class="text-2xl text-green-600 mb-2">
+          <i class="fa fa-credit-card" aria-hidden="true"></i>
+        </div>
+        <h3 class="font-bold text-lg">Покупка в кредит</h3>
+        <p class="text-gray-600">Выгодные условия</p>
+      </div>
+      <div class="flex-1">
+        <div class="text-2xl text-green-600 mb-2">
+          <i class="fa fa-map-marker" aria-hidden="true"></i>
+        </div>
+        <h3 class="font-bold text-lg">Самовывоз</h3>
+        <p class="text-gray-600">Удобные точки выдачи</p>
+      </div>
+    </div>
+  </div>
+{% endblock %}

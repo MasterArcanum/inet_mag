@@ -345,5 +345,16 @@ def manage_orders():
 
 
 
+@app.route('/admin/products/view/<int:product_id>')
+def view_product(product_id):
+    if not admin_required():
+        return redirect(url_for('login'))
+    product = Product.query.get_or_404(product_id)
+    # Получаем все файлы, связанные с товаром, чтобы отобразить изображение
+    product_files = ProductFile.query.filter_by(product_id=product.id).all()
+    return render_template('admin_product_detail.html', product=product, product_files=product_files)
+
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)

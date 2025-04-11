@@ -23,13 +23,14 @@
             <td class="py-3 px-4">{{ product.name }}</td>
             <td class="py-3 px-4">{{ product.category.name if product.category else 'Не задана' }}</td>
             <td class="py-3 px-4">{{ product.price }}</td>
-            <td class="py-3 px-4">
-              <a href="{{ url_for('edit_product', product_id=product.id) }}" class="text-blue-500 hover:underline">Редактировать</a>
-              <form action="{{ url_for('delete_product', product_id=product.id) }}" method="post" class="inline-block">
-                <button type="submit" class="text-red-500 hover:underline ml-2">Удалить</button>
-              </form>
-            </td>
-          </tr>
+           <td class="py-3 px-4">
+  <a href="{{ url_for('view_product', product_id=product.id) }}" class="text-purple-600 hover:underline">Подробнее</a>
+  <a href="{{ url_for('edit_product', product_id=product.id) }}" class="text-blue-500 hover:underline ml-2">Редактировать</a>
+  <form action="{{ url_for('delete_product', product_id=product.id) }}" method="post" class="inline-block">
+    <button type="submit" class="text-red-500 hover:underline ml-2">Удалить</button>
+  </form>
+</td>
+
           {% endfor %}
         </tbody>
       </table>
