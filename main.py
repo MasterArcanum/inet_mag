@@ -25,9 +25,13 @@ class User(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    # Увеличено поле для хранения хеша пароля, чтобы вместить scrypt-хеш
     password_hash = db.Column(db.String(255), nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
+    # Новые поля для профиля:
+    full_name = db.Column(db.String(150))
+    phone = db.Column(db.String(20))
+    birth_date = db.Column(db.Date)
+    delivery_address = db.Column(db.String(255))
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -397,7 +401,7 @@ def edit_profile():
     if request.method == 'GET':
         return render_template('edit_profile.html', user=user)
 
-    # Если запрос POST, то обновляем данные из формы
+    # Получаем данные из формы
     full_name = request.form.get('full_name', '').strip()
     phone = request.form.get('phone', '').strip()
     delivery_address = request.form.get('delivery_address', '').strip()
@@ -416,6 +420,12 @@ def edit_profile():
         user.birth_date = None
 
     db.session.commit()
+
+    # Отладочный вывод после commit
+    updated_user = User.query.get(session['user_id'])
+    print("DEBUG: updated_user:", updated_user.full_name, updated_user.phone,
+          updated_user.delivery_address, updated_user.birth_date)
+
     flash('Данные профиля обновлены.', 'success')
     return redirect(url_for('profile'))
 
