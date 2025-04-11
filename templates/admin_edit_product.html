@@ -1,0 +1,106 @@
+{% extends "layout.html" %}
+
+{% block title %}Редактировать товар{% endblock %}
+
+{% block content %}
+  {% include 'navbar.html' %}
+  <div class="container mx-auto mt-8 px-4" x-data="{ openPreview: false }">
+    <!-- Заголовок и кнопка "Назад" -->
+    <div class="flex justify-between items-center mb-6">
+      <h1 class="text-3xl font-bold text-gray-800">Редактировать товар</h1>
+      <a href="{{ url_for('manage_products') }}" class="bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors duration-300">
+        Назад
+      </a>
+    </div>
+
+    <!-- Форма редактирования товара -->
+    <form action="{{ url_for('edit_product', product_id=product.id) }}" method="post" enctype="multipart/form-data">
+      <div class="mb-4">
+        <label class="block text-gray-700">Название товара</label>
+        <input type="text" name="name" value="{{ product.name }}" class="w-full border rounded p-2" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Описание</label>
+        <textarea name="description" class="w-full border rounded p-2">{{ product.description }}</textarea>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Цена</label>
+        <input type="number" step="0.01" name="price" value="{{ product.price }}" class="w-full border rounded p-2" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Количество на складе</label>
+        <input type="number" name="stock" value="{{ product.stock }}" class="w-full border rounded p-2" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Категория</label>
+        <select name="category_id" class="w-full border rounded p-2" required>
+          {% for category in categories %}
+            <option value="{{ category.id }}" {% if category.id == product.category_id %}selected{% endif %}>
+              {{ category.name }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <!-- Поле для загрузки нового изображения -->
+      <div class="mb-4">
+        <label class="block text-gray-700">Заменить изображение (jpeg, jpg, png, webp)</label>
+        <input type="file" name="files" class="w-full" accept="image/jpeg,image/jpg,image/png,image/webp">
+      </div>
+      <div class="flex items-center space-x-4">
+        <button type="submit" class="bg-green-800 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors duration-300">
+          Сохранить изменения
+        </button>
+        <!-- Кнопка для открытия модального окна с превью карточки товара -->
+        <button type="button" @click="openPreview = true" class="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-500 transition-colors duration-300">
+          Просмотр товара
+        </button>
+      </div>
+    </form>
+
+    <!-- Модальное окно для превью карточки товара -->
+    <div x-show="openPreview" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50" x-transition>
+      <div class="bg-white rounded-lg shadow-2xl max-w-md w-full relative overflow-hidden">
+        <!-- Заголовок модального окна с кнопкой закрыть -->
+        <div class="flex justify-between items-center bg-gray-100 px-4 py-3 border-b">
+          <h2 class="text-xl font-semibold text-gray-800">Превью товара</h2>
+          <button @click="openPreview = false" class="text-gray-700 hover:text-gray-900 text-2xl">&times;</button>
+        </div>
+        <!-- Содержимое карточки товара -->
+        <div class="p-4">
+          {% set preview_files = product_files | selectattr("file_type", "in", ["image/jpeg", "image/jpg", "image/png", "image/webp"]) | list %}
+          {% if preview_files|length > 0 %}
+            {% set preview_file = preview_files[0] %}
+          {% else %}
+            {% set preview_file = None %}
+          {% endif %}
+          {% if preview_file %}
+            <img class="w-full h-64 object-cover rounded-md" src="data:{{ preview_file.file_type }};base64,{{ preview_file.data_base64 }}" alt="{{ product.name }}">
+          {% else %}
+            <div class="w-full h-64 bg-gray-200 flex items-center justify-center rounded-md">
+              <span class="text-gray-500">Нет изображения</span>
+            </div>
+          {% endif %}
+          <div class="mt-4">
+            <h3 class="text-2xl font-bold text-gray-800">{{ product.name }}</h3>
+            <p class="text-gray-700 mt-2">{{ product.description }}</p>
+          </div>
+        </div>
+        <!-- Нижняя панель карточки: цена, количество и кнопка "Добавить в корзину" -->
+        <div class="bg-gray-100 px-4 py-3 border-t flex items-center justify-between">
+          <div>
+            <span class="text-green-800 font-semibold text-lg">₽{{ product.price }}</span>
+            <span class="text-gray-600 ml-2">Кол-во: {{ product.stock }}</span>
+          </div>
+          <button class="flex items-center bg-green-800 text-white px-3 py-2 rounded hover:bg-green-700 transition-colors duration-300">
+
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+{% endblock %}
