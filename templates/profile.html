@@ -1,0 +1,39 @@
+{% extends "layout.html" %}
+
+{% block title %}Личный кабинет{% endblock %}
+
+{% block content %}
+  {% include 'navbar.html' %}
+  <div class="container mx-auto mt-8 px-4">
+    <div class="flex items-center justify-between mb-6">
+      <h1 class="text-4xl font-bold text-gray-800">Личный кабинет</h1>
+      <!-- Переход на страницу редактирования профиля -->
+      <a href="{{ url_for('edit_profile') }}" class="bg-green-800 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors duration-300">
+        Редактировать профиль
+      </a>
+    </div>
+
+    <div class="bg-white rounded-lg shadow p-6">
+      <h2 class="text-2xl font-bold mb-4">Мои данные</h2>
+      <div class="space-y-3 text-gray-700">
+        <p><span class="font-semibold">ФИО:</span> {{ user.full_name or "Не указано" }}</p>
+        <p><span class="font-semibold">Контактный телефон:</span> {{ user.phone or "Не указан" }}</p>
+        <p>
+          <span class="font-semibold">Дата рождения:</span>
+          {% if user.birth_date %}
+            {{ user.birth_date.strftime('%d.%m.%Y') }}
+          {% else %}
+            Не указана
+          {% endif %}
+        </p>
+        <p><span class="font-semibold">Адрес доставки:</span> {{ user.delivery_address or "Не задан" }}</p>
+      </div>
+      <div class="mt-6">
+        <a href="{{ url_for('change_password') }}" class="bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors duration-300">
+          Изменить пароль
+        </a>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

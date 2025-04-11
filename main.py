@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import base64
+from datetime import datetime
+
 
 load_dotenv()
 
@@ -139,7 +141,10 @@ def profile():
         flash('Пожалуйста, войдите в систему для доступа к профилю.', 'error')
         return redirect(url_for('login'))
     # Заглушка для страницы профиля
-    return "Страница профиля пользователя (заглушка)"
+    return render_template('profile.html')
+
+
+
 
 
 @app.route('/shop')
@@ -382,6 +387,37 @@ def change_password():
         return redirect(url_for('profile'))
     return render_template('change_password.html')
 
+
+@app.route('/profile/edit', methods=['GET', 'POST'])
+def edit_profile():
+    if 'user_id' not in session:
+        flash('Пожалуйста, войдите в систему для доступа к профилю.', 'error')
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    if request.method == 'GET':
+        return render_template('edit_profile.html', user=user)
+
+    # Если запрос POST, то обновляем данные из формы
+    full_name = request.form.get('full_name', '').strip()
+    phone = request.form.get('phone', '').strip()
+    delivery_address = request.form.get('delivery_address', '').strip()
+    birth_date_str = request.form.get('birth_date', '').strip()
+
+    user.full_name = full_name
+    user.phone = phone
+    user.delivery_address = delivery_address
+    if birth_date_str:
+        try:
+            user.birth_date = datetime.strptime(birth_date_str, '%Y-%m-%d').date()
+        except ValueError:
+            flash('Некорректный формат даты рождения. Используйте формат ГГГГ-ММ-ДД.', 'error')
+            return redirect(url_for('edit_profile'))
+    else:
+        user.birth_date = None
+
+    db.session.commit()
+    flash('Данные профиля обновлены.', 'success')
+    return redirect(url_for('profile'))
 
 
 if __name__ == '__main__':

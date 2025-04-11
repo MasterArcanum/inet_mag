@@ -1,0 +1,47 @@
+{% extends "layout.html" %}
+
+{% block title %}Редактировать профиль{% endblock %}
+
+{% block content %}
+  {% include 'navbar.html' %}
+  <div class="container mx-auto mt-8 px-4">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Редактировать профиль</h1>
+    <form action="{{ url_for('edit_profile') }}" method="post" class="max-w-lg">
+      <div class="mb-4">
+        <label class="block text-gray-700">ФИО</label>
+        <input type="text" name="full_name" value="{{ user.full_name or '' }}" class="w-full border rounded p-2" placeholder="Введите ваше ФИО" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Контактный телефон</label>
+        <input type="text" name="phone" value="{{ user.phone or '' }}" class="w-full border rounded p-2" placeholder="Введите ваш телефон" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Дата рождения</label>
+        <input type="date" name="birth_date" value="{{ user.birth_date.strftime('%Y-%m-%d') if user.birth_date else '' }}" class="w-full border rounded p-2">
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Адрес доставки</label>
+        <textarea name="delivery_address" class="w-full border rounded p-2" placeholder="Укажите адрес доставки" required>{{ user.delivery_address or '' }}</textarea>
+      </div>
+      {% if user.delivery_address %}
+      <div class="mb-4">
+        <a href="https://www.google.com/maps?q={{ user.delivery_address | urlencode }}" target="_blank" class="text-blue-600 hover:underline">
+          Посмотреть адрес на карте
+        </a>
+      </div>
+      {% endif %}
+      <button type="submit" class="bg-green-800 text-white px-4 py-2 rounded hover:bg-green-700 transition-colors duration-300">
+        Сохранить изменения
+      </button>
+    </form>
+    <div class="mt-6">
+      <a href="{{ url_for('change_password') }}" class="bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors duration-300">
+        Изменить пароль
+      </a>
+      <a href="{{ url_for('profile') }}" class="ml-4 bg-gray-800 text-white px-4 py-2 rounded hover:bg-gray-700 transition-colors duration-300">
+        Назад
+      </a>
+    </div>
+  </div>
+
+{% endblock %}

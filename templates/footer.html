@@ -1,0 +1,18 @@
+<footer class="bg-gray-800 text-white py-6">
+  <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
+    <div class="mb-4 md:mb-0">
+     <h1 class="text-white font-extrabold text-3xl tracking-wider">
+          Shop<span class="text-green-300">Style</span>
+        </h1>
+    </div>
+    <div>
+      <ul class="flex space-x-4">
+        <li><a href="{{ url_for('shop_home') }}" class="hover:text-green-400">Главная</a></li>
+        <li><a href="#" class="hover:text-green-400">Каталог</a></li>
+        <li><a href="#" class="hover:text-green-400">Корзина</a></li>
+        <li><a href="{{ url_for('profile') }}" class="hover:text-green-400">Личный кабинет</a></li>
+        <li><a href="#" class="hover:text-green-400">Контакты</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
