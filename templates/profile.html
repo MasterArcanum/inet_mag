@@ -12,26 +12,47 @@
         Редактировать профиль
       </a>
     </div>
-
-    <div class="bg-white rounded-lg shadow p-6">
-      <h2 class="text-2xl font-bold mb-4">Мои данные</h2>
-      <div class="space-y-3 text-gray-700">
-        <p><span class="font-semibold">ФИО:</span> {{ user.full_name or "Не указано" }}</p>
-        <p><span class="font-semibold">Контактный телефон:</span> {{ user.phone or "Не указан" }}</p>
-        <p>
-          <span class="font-semibold">Дата рождения:</span>
-          {% if user.birth_date %}
-            {{ user.birth_date.strftime('%d.%m.%Y') }}
-          {% else %}
-            Не указана
-          {% endif %}
-        </p>
-        <p><span class="font-semibold">Адрес доставки:</span> {{ user.delivery_address or "Не задан" }}</p>
+    <!-- Основной контент в виде двух колонок: слева данные, справа карта -->
+    <div class="bg-white rounded-lg shadow p-6 flex flex-col md:flex-row">
+      <!-- Левая колонка: данные пользователя -->
+      <div class="md:w-1/2 md:pr-4">
+        <h2 class="text-2xl font-bold mb-4">Мои данные</h2>
+        <div class="space-y-3 text-gray-700">
+          <p><span class="font-semibold">ФИО:</span> {{ user.full_name or "Не указано" }}</p>
+          <p><span class="font-semibold">Контактный телефон:</span> {{ user.phone or "Не указан" }}</p>
+          <p>
+            <span class="font-semibold">Дата рождения:</span>
+            {% if user.birth_date %}
+              {{ user.birth_date.strftime('%d.%m.%Y') }}
+            {% else %}
+              Не указана
+            {% endif %}
+          </p>
+          <p><span class="font-semibold">Адрес доставки:</span> {{ user.delivery_address or "Не задан" }}</p>
+        </div>
+        <div class="mt-6">
+          <a href="{{ url_for('change_password') }}" class="bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors duration-300">
+            Изменить пароль
+          </a>
+        </div>
       </div>
-      <div class="mt-6">
-        <a href="{{ url_for('change_password') }}" class="bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors duration-300">
-          Изменить пароль
-        </a>
+      <!-- Правая колонка: карта -->
+      <div class="md:w-1/2 md:pl-4 mt-6 md:mt-0">
+        <h2 class="text-2xl font-bold mb-4">Местоположение доставки</h2>
+        {% if user.delivery_address %}
+          <div class="w-full h-64 border rounded">
+            <iframe
+              width="100%"
+              height="100%"
+              frameborder="0"
+              style="border:0"
+              src="https://www.google.com/maps?q={{ user.delivery_address | urlencode }}&output=embed"
+              allowfullscreen>
+            </iframe>
+          </div>
+        {% else %}
+          <p class="text-gray-700">Адрес доставки не задан.</p>
+        {% endif %}
       </div>
     </div>
   </div>
