@@ -46,6 +46,10 @@
               </button>
               <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-50">
                 <a href="{{ url_for('profile') }}" class="block px-4 py-2 text-gray-800 hover:bg-green-100">Личный кабинет</a>
+                {% if user and user.is_admin %}
+                <a href="{{ url_for('admin_panel') }}" class="block px-4 py-2 text-gray-800 hover:bg-green-100">Панель админа</a>
+                {% endif %}
+
                 <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-gray-800 hover:bg-green-100">Выйти</a>
               </div>
             </div>
@@ -58,23 +62,7 @@
               <span>Войти</span>
             </a>
           {% endif %}
-          <!-- Выпадающее меню для админа (дополнительные пункты) -->
-          {% if user and user.is_admin %}
-            <div x-data="{ open: false }" class="relative">
-              <button @click="open = !open" class="flex items-center text-white hover:text-green-200 transition-colors duration-200" title="Администрирование">
-                <h1>A</h1>
 
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-50">
-                <a href="{{ url_for('admin_panel') }}" class="block px-4 py-2 text-gray-800 hover:bg-green-100">Панель админа</a>
-                <a href="{{ url_for('manage_products') }}" class="block px-4 py-2 text-gray-800 hover:bg-green-100">Товары</a>
-                <a href="{{ url_for('manage_orders') }}" class="block px-4 py-2 text-gray-800 hover:bg-green-100">Заказы</a>
-              </div>
-            </div>
-          {% endif %}
         </div>
       </div>
       <!-- Мобильное меню (опционально) -->

@@ -356,5 +356,33 @@ def view_product(product_id):
 
 
 
+
+
+@app.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    if 'user_id' not in session:
+        flash('Пожалуйста, войдите в систему.', 'error')
+        return redirect(url_for('login'))
+    if request.method == 'POST':
+        # Получаем данные формы
+        old_password = request.form.get('old_password')
+        new_password = request.form.get('new_password')
+        confirm_password = request.form.get('confirm_password')
+        user = User.query.get(session['user_id'])
+        if not user.check_password(old_password):
+            flash('Старый пароль не верный.', 'error')
+            return redirect(url_for('change_password'))
+        if new_password != confirm_password:
+            flash('Новый пароль не совпадает.', 'error')
+            return redirect(url_for('change_password'))
+        # Обновляем пароль (не забудьте хешировать новый пароль)
+        user.password_hash = generate_password_hash(new_password)
+        db.session.commit()
+        flash('Пароль успешно изменён.', 'success')
+        return redirect(url_for('profile'))
+    return render_template('change_password.html')
+
+
+
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)
