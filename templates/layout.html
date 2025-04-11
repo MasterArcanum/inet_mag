@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>{% block title %}Интернет магазин{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+  <style>
+
+    .fade-out {
+      transition: opacity 1s ease-out;
+      opacity: 0;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      <div id="flash-container" class="fixed top-4 left-0 right-0 z-50 flex justify-center space-x-2">
+        {% for category, message in messages %}
+          <div class="flash-message px-4 py-2 rounded text-white
+             {% if category == 'error' %}bg-red-500{% elif category == 'success' %}bg-green-700{% elif category == 'info' %}bg-blue-500{% endif %}
+             shadow-lg">
+            {{ message }}
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block content %}{% endblock %}
+
+  <script>
+    setTimeout(function() {
+      document.querySelectorAll('.flash-message').forEach(function(el) {
+        el.classList.add('fade-out');
+      });
+      // После завершения анимации (1 секунда) удаляем контейнер
+      setTimeout(function() {
+        const container = document.getElementById('flash-container');
+        if (container) container.remove();
+      }, 1000);
+    }, 2000);
+  </script>
+</body>
+</html>

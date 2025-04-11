@@ -1,0 +1,42 @@
+{% extends "layout.html" %}
+{% block title %}Добавить товар{% endblock %}
+{% block content %}
+  {% include 'navbar.html' %}
+  <div class="container mx-auto mt-8 px-4">
+    <h1 class="text-3xl font-bold mb-4">Добавить товар</h1>
+    <form action="{{ url_for('add_product') }}" method="post" enctype="multipart/form-data">
+      <div class="mb-4">
+        <label class="block text-gray-700">Название товара</label>
+        <input type="text" name="name" class="w-full border rounded p-2" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Описание</label>
+        <textarea name="description" class="w-full border rounded p-2"></textarea>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Цена</label>
+        <input type="number" step="0.01" name="price" class="w-full border rounded p-2" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Количество на складе</label>
+        <input type="number" name="stock" class="w-full border rounded p-2" required>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Категория</label>
+        <select name="category_id" class="w-full border rounded p-2" required>
+          {% for category in categories %}
+          <option value="{{ category.id }}">{{ category.name }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="mb-4">
+        <label class="block text-gray-700">Прикрепить файлы (изображения, документы)</label>
+        <input type="file" name="files" class="w-full" multiple>
+      </div>
+      <button type="submit" class="bg-green-800 text-white px-4 py-2 rounded hover:bg-green-700">
+        Добавить товар
+      </button>
+    </form>
+    <a href="{{ url_for('admin_panel') }}" class="inline-block mt-6 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors duration-300">Назад</a>
+  </div>
+{% endblock %}
