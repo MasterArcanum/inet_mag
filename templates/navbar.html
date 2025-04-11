@@ -25,12 +25,15 @@
             </svg>
           </a>
           <!-- Сообщения -->
-          <a href="#" class="flex items-center text-white hover:text-green-200 transition-colors duration-200" title="Сообщения">
+           {% if user and user.is_admin %}
+          <a href="{{ url_for('admin_messages') }}" class="flex items-center text-white hover:text-green-200 transition-colors duration-200" title="Сообщения">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                 d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v7a2 2 0 01-2 2h-4l-4 4z" />
             </svg>
           </a>
+          {% endif %}
+
           <!-- Профиль / Личный кабинет -->
           {% if user %}
             <!-- Если пользователь авторизован, показываем выпадающее меню -->

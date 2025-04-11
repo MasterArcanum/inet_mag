@@ -1,4 +1,4 @@
--- Безопасное удаление роли, если она существует, с отозванием прав принадлежащих этой роли
+-- Безопасное удаление роли, если она существует, с отозванием прав
 DO $$
 BEGIN
   IF EXISTS (SELECT 1 FROM pg_catalog.pg_roles WHERE rolname = 'myshop_user') THEN
@@ -15,7 +15,8 @@ DROP TABLE IF EXISTS products;
 DROP TABLE IF EXISTS categories;
 DROP TABLE IF EXISTS users;
 
--- Таблица пользователей с дополнительными полями для личного кабинета
+-- Таблица пользователей с дополнительными полями для личного кабинета,
+-- включая разделение адреса доставки на отдельные компоненты.
 CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(80) UNIQUE NOT NULL,
@@ -25,7 +26,11 @@ CREATE TABLE users (
     full_name VARCHAR(150),
     phone VARCHAR(20),
     birth_date DATE,
-    delivery_address VARCHAR(255)
+    city VARCHAR(100),
+    street VARCHAR(255),
+    house VARCHAR(50),
+    apartment VARCHAR(50),
+    private_house BOOLEAN NOT NULL DEFAULT FALSE
 );
 
 INSERT INTO users (username, email, password_hash, is_admin)
@@ -96,10 +101,14 @@ CREATE TABLE messages (
     subject VARCHAR(150),
     message TEXT NOT NULL,
     sent_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    answered BOOLEAN NOT NULL DEFAULT FALSE,
+    answer TEXT,
+    answered_at TIMESTAMP,
     CONSTRAINT fk_message_user
         FOREIGN KEY (user_id)
         REFERENCES users(id)
 );
+
 
 -- Создаем роль myshop_user с возможностью подключения (LOGIN)
 CREATE ROLE myshop_user WITH LOGIN PASSWORD '1234';

@@ -1,0 +1,60 @@
+{% extends "layout.html" %}
+
+{% block title %}Сообщения от пользователей{% endblock %}
+
+{% block content %}
+  {% include 'navbar.html' %}
+  <div class="container mx-auto mt-8 px-4" x-data="{ filter: 'all' }">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6">Сообщения от пользователей</h1>
+
+    <div class="mb-6">
+      <button @click="filter = 'all'"
+              :class="filter === 'all' ? 'bg-green-600 text-white' : 'text-gray-800'"
+              class="px-4 py-2 rounded border">
+        Все
+      </button>
+      <button @click="filter = 'active'"
+              :class="filter === 'active' ? 'bg-green-600 text-white' : 'text-gray-800'"
+              class="ml-2 px-4 py-2 rounded border">
+        Активные
+      </button>
+      <button @click="filter = 'answered'"
+              :class="filter === 'answered' ? 'bg-green-600 text-white' : 'text-gray-800'"
+              class="ml-2 px-4 py-2 rounded border">
+        Отвеченные
+      </button>
+    </div>
+
+    {% if messages %}
+      <ul class="space-y-4">
+        {% for msg in messages %}
+        <li x-data="{ answered: {{ 'true' if msg.answered else 'false' }} }"
+              x-show="filter === 'all' || (filter === 'active' && answered === false) || (filter === 'answered' && answered === true)"
+              :class="answered ? 'bg-gray-200' : 'bg-white'"
+              class="p-4 rounded shadow">
+            <div class="flex justify-between items-center">
+              <p class="text-lg font-semibold" :class="answered ? 'text-gray-600' : 'text-gray-800'">
+                {{ msg.subject or "Без темы" }}
+              </p>
+              <template x-if="answered === false">
+                <form action="{{ url_for('mark_answered', message_id=msg.id) }}" method="post">
+                  <button type="submit" class="bg-blue-600 text-white px-3 py-1 rounded hover:bg-blue-700 transition-colors">
+                    Отметить как отвеченное
+                  </button>
+                </form>
+              </template>
+              <template x-if="answered === true">
+                <span class="text-green-600 font-bold">&#10003;</span>
+              </template>
+            </div>
+            <p class="text-gray-700 mt-2">{{ msg.message }}</p>
+            <p class="text-sm text-gray-500 mt-2">Отправлено: {{ msg.sent_at.strftime('%d.%m.%Y, %H:%M') }}</p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p class="text-gray-700">Сообщений пока нет.</p>
+    {% endif %}
+  </div>
+
+{% endblock %}

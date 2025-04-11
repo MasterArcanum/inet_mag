@@ -30,7 +30,11 @@ class User(db.Model):
     full_name = db.Column(db.String(150))
     phone = db.Column(db.String(20))
     birth_date = db.Column(db.Date)
-    delivery_address = db.Column(db.String(255))
+    city = db.Column(db.String(100))
+    street = db.Column(db.String(255))
+    house = db.Column(db.String(50))
+    apartment = db.Column(db.String(50))
+    private_house = db.Column(db.Boolean, default=False, nullable=False)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
@@ -62,6 +66,15 @@ class ProductFile(db.Model):
     file_type = db.Column(db.String(50), nullable=False)
     data_base64 = db.Column(db.Text, nullable=False)
     upload_date = db.Column(db.DateTime, server_default=db.func.current_timestamp(), nullable=False)
+
+class Message(db.Model):
+    __tablename__ = 'messages'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # Сообщения принадлежат пользователю
+    subject = db.Column(db.String(150))
+    message = db.Column(db.Text, nullable=False)
+    sent_at = db.Column(db.DateTime, server_default=db.func.current_timestamp(), nullable=False)
+    answered = db.Column(db.Boolean, default=False, nullable=False)
 
 
 
@@ -400,15 +413,10 @@ def edit_profile():
     if request.method == 'GET':
         return render_template('edit_profile.html', user=user)
 
-    # Получаем данные из формы
-    full_name = request.form.get('full_name', '').strip()
-    phone = request.form.get('phone', '').strip()
-    delivery_address = request.form.get('delivery_address', '').strip()
+    # Обновление личных данных
+    user.full_name = request.form.get('full_name', '').strip()
+    user.phone = request.form.get('phone', '').strip()
     birth_date_str = request.form.get('birth_date', '').strip()
-
-    user.full_name = full_name
-    user.phone = phone
-    user.delivery_address = delivery_address
     if birth_date_str:
         try:
             user.birth_date = datetime.strptime(birth_date_str, '%Y-%m-%d').date()
@@ -418,15 +426,79 @@ def edit_profile():
     else:
         user.birth_date = None
 
+    # Обновление адреса доставки из отдельных полей
+    user.city = request.form.get('city', '').strip()
+    user.street = request.form.get('street', '').strip()
+    user.house = request.form.get('house', '').strip()
+    user.apartment = request.form.get('apartment', '').strip()  # может быть пустым, если private_house установлено
+    user.private_house = True if request.form.get('private_house') == '1' else False
+
     db.session.commit()
-
-    # Отладочный вывод после commit
-    updated_user = User.query.get(session['user_id'])
-    print("DEBUG: updated_user:", updated_user.full_name, updated_user.phone,
-          updated_user.delivery_address, updated_user.birth_date)
-
     flash('Данные профиля обновлены.', 'success')
     return redirect(url_for('profile'))
+
+@app.route('/contacts', methods=['GET', 'POST'])
+def contacts():
+    if request.method == 'POST':
+        # Получаем данные формы
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        message_text = request.form.get('message', '').strip()
+
+        # Формируем тему сообщения, вы можете изменить логику по необходимости
+        subject = f"Сообщение от {name} ({email})"
+
+        # Если пользователь авторизован, можно установить user_id, иначе оставить как None
+        user_id = session.get('user_id')  # Будет None, если пользователь не залогинен
+
+        new_message = Message(user_id=user_id, subject=subject, message=message_text)
+        db.session.add(new_message)
+        db.session.commit()
+
+        flash('Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время!', 'success')
+        return redirect(url_for('contacts'))
+    return render_template('contacts.html')
+
+@app.route('/messages')
+def user_messages():
+    if 'user_id' not in session:
+        flash('Пожалуйста, войдите в систему для доступа к сообщениям.', 'error')
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    # Предполагаем, что сообщения пользователя хранятся в таблице messages с user_id равным идентификатору пользователя
+    user_msgs = Message.query.filter_by(user_id=user.id).order_by(Message.sent_at.desc()).all()
+    return render_template('messages.html', messages=user_msgs)
+
+
+@app.route('/admin/messages')
+def admin_messages():
+    if 'user_id' not in session:
+        flash('Пожалуйста, войдите в систему.', 'error')
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    if not (user and user.is_admin):
+        flash('У вас нет прав доступа.', 'error')
+        return redirect(url_for('shop_home'))
+
+    messages_list = Message.query.order_by(Message.sent_at.desc()).all()
+    return render_template('admin_messages.html', messages=messages_list)
+
+
+@app.route('/admin/messages/mark_answered/<int:message_id>', methods=['POST'])
+def mark_answered(message_id):
+    if 'user_id' not in session:
+        flash('Пожалуйста, войдите в систему.', 'error')
+        return redirect(url_for('login'))
+    user = User.query.get(session['user_id'])
+    if not (user and user.is_admin):
+        flash('У вас нет прав доступа.', 'error')
+        return redirect(url_for('shop_home'))
+
+    msg = Message.query.get_or_404(message_id)
+    msg.answered = True
+    db.session.commit()
+    flash('Сообщение отмечено как отвеченное.', 'success')
+    return redirect(url_for('admin_messages'))
 
 
 if __name__ == '__main__':

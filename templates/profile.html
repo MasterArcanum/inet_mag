@@ -12,9 +12,8 @@
         Редактировать профиль
       </a>
     </div>
-    <!-- Основной контент в виде двух колонок: слева данные, справа карта -->
     <div class="bg-white rounded-lg shadow p-6 flex flex-col md:flex-row">
-      <!-- Левая колонка: данные пользователя -->
+      <!-- Левая колонка: Данные пользователя -->
       <div class="md:w-1/2 md:pr-4">
         <h2 class="text-2xl font-bold mb-4">Мои данные</h2>
         <div class="space-y-3 text-gray-700">
@@ -28,7 +27,17 @@
               Не указана
             {% endif %}
           </p>
-          <p><span class="font-semibold">Адрес доставки:</span> {{ user.delivery_address or "Не задан" }}</p>
+          <p>
+            <span class="font-semibold">Адрес доставки:</span>
+            {% if user.city or user.street or user.house %}
+              {{ user.city or '' }}
+              {% if user.street %}, {{ user.street }}{% endif %}
+              {% if user.house %} д. {{ user.house }}{% endif %}
+              {% if not user.private_house and user.apartment %}, кв. {{ user.apartment }}{% endif %}
+            {% else %}
+              Не задан
+            {% endif %}
+          </p>
         </div>
         <div class="mt-6">
           <a href="{{ url_for('change_password') }}" class="bg-blue-800 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors duration-300">
@@ -36,19 +45,15 @@
           </a>
         </div>
       </div>
-      <!-- Правая колонка: карта -->
+      <!-- Правая колонка: Карта адреса доставки -->
       <div class="md:w-1/2 md:pl-4 mt-6 md:mt-0">
         <h2 class="text-2xl font-bold mb-4">Местоположение доставки</h2>
-        {% if user.delivery_address %}
+        {% if user.city or user.street or user.house %}
           <div class="w-full h-64 border rounded">
-            <iframe
-              width="100%"
-              height="100%"
-              frameborder="0"
-              style="border:0"
-              src="https://www.google.com/maps?q={{ user.delivery_address | urlencode }}&output=embed"
-              allowfullscreen>
-            </iframe>
+            {% set full_address = ((user.city or '') ~ ' ' ~ (user.street or '') ~ ' ' ~ (user.house or '') ~ (not user.private_house and user.apartment and (' кв. ' ~ user.apartment) or ''))|trim %}
+            <iframe width="100%" height="100%" frameborder="0" style="border:0"
+                    src="https://www.google.com/maps?q={{ full_address | urlencode }}&output=embed"
+                    allowfullscreen></iframe>
           </div>
         {% else %}
           <p class="text-gray-700">Адрес доставки не задан.</p>
