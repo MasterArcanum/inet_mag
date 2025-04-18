@@ -1,18 +1,58 @@
-<footer class="bg-gray-800 text-white py-6">
-  <div class="container mx-auto px-4 flex flex-col md:flex-row justify-between items-center">
-    <div class="mb-4 md:mb-0">
-     <h1 class="text-white font-extrabold text-3xl tracking-wider">
-          Shop<span class="text-green-300">Style</span>
-        </h1>
+<footer class="bg-gray-900 text-gray-200 pt-12 pb-8">
+  <div class="max-w-7xl mx-auto px-6 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <!-- Brand & Social -->
+    <div class="space-y-4">
+      <h1 class="text-3xl font-extrabold tracking-wider text-white">
+        Shop<span class="text-green-400">Style</span>
+      </h1>
+      <p class="text-gray-400">© {{ current_year }} ShopStyle. Все права защищены.</p>
+      <div class="flex space-x-4 mt-4">
+        <a href="#" class="hover:text-green-400 transition-colors">
+          <!-- Facebook -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.876v-6.988H7.898v-2.888h2.54V9.797c0-2.507 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562v1.875h2.773l-.443 2.888h-2.33v6.988C18.343 21.128 22 16.991 22 12z"/>
+          </svg>
+        </a>
+        <a href="#" class="hover:text-green-400 transition-colors">
+          <!-- Twitter -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M24 4.557a9.93 9.93 0 01-2.828.775 4.932 4.932 0 002.165-2.724 9.864 9.864 0 01-3.127 1.195 4.916 4.916 0 00-8.381 4.482A13.944 13.944 0 011.671 3.149a4.916 4.916 0 001.523 6.574 4.897 4.897 0 01-2.229-.616v.06a4.916 4.916 0 003.946 4.827 4.902 4.902 0 01-2.224.084 4.918 4.918 0 004.588 3.417A9.867 9.867 0 010 19.54a13.94 13.94 0 007.548 2.213c9.056 0 14.009-7.514 14.009-14.01 0-.213-.005-.425-.014-.636A10.012 10.012 0 0024 4.557z"/>
+          </svg>
+        </a>
+        <a href="#" class="hover:text-green-400 transition-colors">
+          <!-- Instagram -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 1.366.062 2.633.35 3.608 1.324.975.975 1.262 2.242 1.324 3.608.058 1.266.07 1.646.07 4.85s-.012 3.584-.07 4.85c-.062 1.366-.35 2.633-1.324 3.608-.975.975-2.242 1.262-3.608 1.324-1.266.058-1.646.07-4.85.07s-3.584-.012-4.85-.07c-1.366-.062-2.633-.35-3.608-1.324-.975-.975-1.262-2.242-1.324-3.608C2.175 15.584 2.163 15.204 2.163 12s.012-3.584.07-4.85c.062-1.366.35-2.633 1.324-3.608C4.532 2.513 5.799 2.225 7.165 2.163 8.431 2.105 8.811 2.163 12 2.163zm0-2.163C8.737 0 8.332.013 7.052.072 5.769.13 4.548.443 3.49 1.501 2.433 2.558 2.12 3.779 2.062 5.062.003 6.342 0 6.737 0 12s.013 5.658.072 6.938c.058 1.283.371 2.504 1.428 3.562 1.058 1.058 2.279 1.371 3.562 1.428C8.332 23.987 8.737 24 12 24s3.668-.013 4.948-.072c1.283-.058 2.504-.371 3.562-1.428 1.058-1.058 1.371-2.279 1.428-3.562.059-1.28.072-1.685.072-6.948s-.013-5.668-.072-6.948c-.058-1.283-.371-2.504-1.428-3.562-1.058-1.058-2.279-1.371-3.562-1.428C15.668.013 15.263 0 12 0z"/>
+          </svg>
+        </a>
+      </div>
     </div>
+
+    <!-- Quick Links -->
     <div>
-      <ul class="flex space-x-4">
-        <li><a href="{{ url_for('shop_home') }}" class="hover:text-green-400">Главная</a></li>
-        <li><a href="#" class="hover:text-green-400">Каталог</a></li>
-        <li><a href="#" class="hover:text-green-400">Корзина</a></li>
-        <li><a href="{{ url_for('profile') }}" class="hover:text-green-400">Личный кабинет</a></li>
-        <li><a href="{{ url_for('contacts') }}" class="hover:text-green-400">Контакты</a></li>
+      <h2 class="text-xl font-semibold text-white mb-4">Быстрые ссылки</h2>
+      <ul class="space-y-2">
+        <li><a href="{{ url_for('shop_home') }}" class="hover:text-green-400 transition-colors">Главная</a></li>
+        <li><a href="{{ url_for('manage_categories') }}" class="hover:text-green-400 transition-colors">Каталог</a></li>
+        <li><a href="{{ url_for('shop_home') }}#cart" class="hover:text-green-400 transition-colors">Корзина</a></li>
+        <li><a href="{{ url_for('profile') }}" class="hover:text-green-400 transition-colors">Личный кабинет</a></li>
+        <li><a href="{{ url_for('contacts') }}" class="hover:text-green-400 transition-colors">Контакты</a></li>
       </ul>
     </div>
+
+    <!-- Contact Info -->
+    <div>
+      <h2 class="text-xl font-semibold text-white mb-4">Контактная информация</h2>
+      <ul class="space-y-2 text-gray-400">
+        <li>Телефон: +7 (495) 123-45-67</li>
+        <li>Email: info@example.com</li>
+        <li>Адрес: ул. Примерная, 123</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Footer Bottom -->
+  <div class="mt-8 border-t border-gray-700 pt-4 text-center text-gray-500">
+    <p>Разработано с ❤️ командой Modern Store</p>
   </div>
 </footer>

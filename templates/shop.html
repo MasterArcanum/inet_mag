@@ -3,7 +3,6 @@
 {% block title %}Главная страница магазина{% endblock %}
 
 {% block content %}
-  {% include 'navbar.html' %}
   <div class="container mx-auto mt-8 px-4">
     {% if user %}
       <h1 class="text-4xl font-bold mb-4 text-gray-800">Добро пожаловать, {{ user.username }}!</h1>

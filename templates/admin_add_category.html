@@ -1,20 +1,92 @@
 {% extends "layout.html" %}
+
 {% block title %}Добавить категорию{% endblock %}
+
 {% block content %}
-  {% include 'navbar.html' %}
-  <div class="container mx-auto mt-8 px-4">
-    <h1 class="text-3xl font-bold mb-4">Добавить категорию</h1>
-    <form action="{{ url_for('add_category') }}" method="post">
-      <div class="mb-4">
-        <label class="block text-gray-700">Название категории</label>
-        <input type="text" name="name" class="w-full border rounded p-2" required>
+
+
+  <div class="flex min-h-screen bg-gray-100">
+    <!-- Sidebar -->
+    <aside class="w-64 bg-white shadow-lg">
+      <div class="p-6">
+        <h2 class="text-2xl font-bold text-gray-800">Admin Panel</h2>
       </div>
-      <div class="mb-4">
-        <label class="block text-gray-700">Описание</label>
-        <textarea name="description" class="w-full border rounded p-2"></textarea>
+      <nav class="mt-6">
+        <ul>
+          <li class="mb-2">
+            <a href="{{ url_for('manage_products') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-200 transition-colors rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 9H4l1-9z" />
+              </svg>
+              <span class="font-medium">Товары</span>
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="{{ url_for('manage_categories') }}" class="flex items-center px-6 py-3 bg-gray-200 text-gray-900 rounded-lg"> <!-- active -->
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7a1 1 0 011-1h3l8 8-6 6-8-8V8a1 1 0 011-1z" />
+              </svg>
+              <span class="font-medium">Категории</span>
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="{{ url_for('manage_orders') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-200 transition-colors rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5h6M9 3h6a2 2 0 012 2v2a2 2 0 01-2 2H9a2 2 0 01-2-2V5a2 2 0 012-2z M9 13h6m-6 4h6m-6 4h6" />
+              </svg>
+              <span class="font-medium">Заказы</span>
+            </a>
+          </li>
+          <li class="mb-2">
+            <a href="{{ url_for('admin_messages') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-200 transition-colors rounded-lg">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4-.8L3 20l1.8-4A7.968 7.968 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+              </svg>
+              <span class="font-medium">Сообщения</span>
+            </a>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-8">
+      <h1 class="text-3xl font-bold text-gray-800 mb-6">Добавить категорию</h1>
+
+      <div class="bg-white rounded-2xl shadow-lg p-6 max-w-xl mx-auto">
+        <form action="{{ url_for('add_category') }}" method="post" class="space-y-6">
+          <div>
+            <label for="name" class="block text-gray-700 font-medium mb-2">Название категории</label>
+            <div class="relative">
+              <input id="name" name="name" type="text" required
+                     class="w-full border border-gray-300 rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-600"/>
+              <div class="absolute inset-y-0 right-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 9l3 3-3 3m5-6l3 3-3 3" />
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <label for="description" class="block text-gray-700 font-medium mb-2">Описание</label>
+            <textarea id="description" name="description"
+                      class="w-full border border-gray-300 rounded-xl px-4 py-2 h-32 resize-none focus:outline-none focus:ring-2 focus:ring-green-600"></textarea>
+          </div>
+
+          <div class="flex items-center justify-between">
+            <button type="submit"
+                    class="flex items-center bg-green-600 text-white px-5 py-2 rounded-2xl hover:bg-green-700 transition-colors duration-300">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+              </svg>
+              Добавить
+            </button>
+            <a href="{{ url_for('admin_panel') }}"
+               class="text-gray-600 font-medium hover:underline">Отмена</a>
+          </div>
+        </form>
       </div>
-      <button type="submit" class="bg-green-800 text-white px-4 py-2 rounded hover:bg-green-700">Добавить категорию</button>
-    </form>
-    <a href="{{ url_for('admin_panel') }}" class="inline-block mt-6 bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition-colors duration-300">Назад</a>
+    </main>
   </div>
 {% endblock %}

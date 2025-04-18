@@ -1,29 +1,54 @@
 {% extends "layout.html" %}
 
-{% block title %}Вход в систему{% endblock %}
+{% block title %}Вход - Modern Store{% endblock %}
 
 {% block content %}
-<!-- Фоновое изображение для страницы входа -->
-<div class="min-h-screen flex items-center justify-center px-4" style="background-image: url('{{ url_for('static', filename='img/register.webp') }}'); background-size: cover; background-position: center;">
-  <div class="bg-white bg-opacity-90 p-8 rounded-xl shadow-lg w-full max-w-md">
-    <h2 class="text-3xl font-bold mb-6 text-center text-gray-800">Вход в систему</h2>
-    <form action="{{ url_for('login') }}" method="post">
-      <div class="mb-5">
-        <label class="block text-gray-700 mb-1" for="username">Имя пользователя</label>
-        <input id="username" name="username" type="text" required class="w-full border border-gray-300 rounded py-2 px-3 focus:outline-none focus:border-green-800">
+  <!-- Login Page -->
+  <div class="min-h-screen flex items-center justify-center bg-gray-50">
+    <!-- Background Image Container -->
+    <div class="absolute inset-0 bg-cover bg-center" style="background-image: url('{{ url_for('static', filename='img/register.webp') }}');"></div>
+    <div class="absolute inset-0 bg-gray-900 opacity-50"></div>
+
+    <!-- Form Card -->
+    <div class="relative bg-white rounded-2xl shadow-2xl p-8 w-full max-w-sm backdrop-blur-md bg-opacity-80">
+      <div class="text-center mb-6">
+        <h1 class="text-4xl font-extrabold text-gray-800">Modern Store</h1>
+        <p class="text-gray-600 mt-2">Добро пожаловать! Пожалуйста, войдите.</p>
       </div>
-      <div class="mb-5">
-        <label class="block text-gray-700 mb-1" for="password">Пароль</label>
-        <input id="password" name="password" type="password" required class="w-full border border-gray-300 rounded py-2 px-3 focus:outline-none focus:border-green-800">
-      </div>
-      <button type="submit" class="w-full bg-green-800 text-white py-2 rounded hover:bg-green-700 transition-colors duration-300">
-        Войти
-      </button>
-    </form>
-    <p class="mt-6 text-center text-gray-600">
-      Нет аккаунта?
-      <a href="{{ url_for('register') }}" class="text-green-800 font-medium hover:underline">Зарегистрироваться</a>
-    </p>
+      <form action="{{ url_for('login') }}" method="post" class="space-y-5">
+        <div class="relative">
+          <label for="username" class="sr-only">Имя пользователя</label>
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <!-- User Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.121 17.804A8.962 8.962 0 0112 15a8.962 8.962 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+            </svg>
+          </div>
+          <input id="username" name="username" type="text" required
+                 class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                 placeholder="Имя пользователя" />
+        </div>
+        <div class="relative">
+          <label for="password" class="sr-only">Пароль</label>
+          <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <!-- Lock Icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 11c1.657 0 3-.895 3-2V7a3 3 0 10-6 0v2c0 1.105 1.343 2 3 2zm6 0v8a2 2 0 01-2 2H8a2 2 0 01-2-2v-8h12z"/>
+            </svg>
+          </div>
+          <input id="password" name="password" type="password" required
+                 class="w-full pl-10 pr-4 py-2 rounded-xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                 placeholder="Пароль" />
+        </div>
+        <button type="submit"
+                class="w-full flex justify-center items-center bg-green-600 text-white py-2 rounded-full hover:bg-green-700 transition-colors duration-300 font-semibold">
+          Войти
+        </button>
+      </form>
+      <p class="mt-6 text-center text-gray-700">
+        Нет аккаунта?
+        <a href="{{ url_for('register') }}" class="text-green-600 font-medium hover:underline">Зарегистрироваться</a>
+      </p>
+    </div>
   </div>
-</div>
 {% endblock %}

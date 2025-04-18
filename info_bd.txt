@@ -109,6 +109,14 @@ CREATE TABLE messages (
         REFERENCES users(id)
 );
 
+CREATE TABLE cart_items (
+    id SERIAL PRIMARY KEY,
+    user_id INTEGER NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+    product_id INTEGER NOT NULL REFERENCES products(id) ON DELETE CASCADE,
+    quantity INTEGER NOT NULL DEFAULT 1,
+    UNIQUE(user_id, product_id)
+);
+
 
 -- Создаем роль myshop_user с возможностью подключения (LOGIN)
 CREATE ROLE myshop_user WITH LOGIN PASSWORD '1234';
@@ -119,3 +127,11 @@ GRANT ALL PRIVILEGES ON DATABASE internet_shop_bd TO myshop_user;
 -- Предоставляем права на все таблицы и последовательности в схеме public
 GRANT ALL PRIVILEGES ON ALL TABLES IN SCHEMA public TO myshop_user;
 GRANT ALL PRIVILEGES ON ALL SEQUENCES IN SCHEMA public TO myshop_user;
+
+
+
+если вдруг корзину будет тупить
+-- Дать все права на таблицу cart_items и её последовательность
+GRANT ALL PRIVILEGES ON TABLE cart_items TO myshop_user;
+GRANT ALL PRIVILEGES ON SEQUENCE cart_items_id_seq TO myshop_user;
+

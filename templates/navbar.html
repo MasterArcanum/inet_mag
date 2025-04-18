@@ -1,81 +1,134 @@
-<nav class="bg-green-800 shadow">
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="flex items-center justify-between h-16">
-      <!-- Логотип -->
+<nav x-data="{ open: false, searchOpen: false }" class="bg-green-900 text-white shadow-sm sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <div class="flex justify-between items-center h-16">
+      <!-- Logo -->
       <div class="flex-shrink-0">
-        <h1 class="text-white font-extrabold text-3xl tracking-wider">
+        <a href="{{ url_for('shop_home') }}" class="text-2xl font-extrabold tracking-wide">
           Shop<span class="text-green-300">Style</span>
-        </h1>
+        </a>
       </div>
-      <!-- Основное меню -->
-      <div class="hidden md:block">
-        <div class="ml-10 flex space-x-6 items-center">
-          <!-- Главная -->
-          <a href="{{ url_for('shop_home') }}" class="flex items-center text-white hover:text-green-200 transition-colors duration-200" title="Домой">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 10l9-7 9 7v10a1 1 0 01-1 1h-4a1 1 0 01-1-1V13H9v7a1 1 0 01-1 1H4a1 1 0 01-1-1V10z" />
-            </svg>
-          </a>
-          <!-- Корзина -->
-          <a href="#" class="flex items-center text-white hover:text-green-200 transition-colors duration-200" title="Корзина">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
-            </svg>
-          </a>
-          <!-- Сообщения -->
-           {% if user and user.is_admin %}
-          <a href="{{ url_for('admin_messages') }}" class="flex items-center text-white hover:text-green-200 transition-colors duration-200" title="Сообщения">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                d="M7 8h10M7 12h4m1 8l-4-4H5a2 2 0 01-2-2V7a2 2 0 012-2h14a2 2 0 012 2v7a2 2 0 01-2 2h-4l-4 4z" />
-            </svg>
-          </a>
+
+      <!-- Desktop Menu -->
+      <div class="hidden md:flex md:space-x-10">
+        <a href="{{ url_for('shop_home') }}" class="group relative py-2 px-3 font-medium hover:text-green-200">
+          Главная
+          <span class="absolute bottom-0 left-0 w-0 h-1 bg-green-300 group-hover:w-full transition-all"></span>
+        </a>
+        <a href="{{ url_for('catalog') }}" class="group relative py-2 px-3 font-medium hover:text-green-200">
+          Каталог
+          <span class="absolute bottom-0 left-0 w-0 h-1 bg-green-300 group-hover:w-full transition-all"></span>
+        </a>
+        <a href="{{ url_for('view_cart') }}" class="relative group py-2 px-3 font-medium hover:text-green-200">
+          Корзина
+          {% if cart_count > 0 %}
+          <span class="absolute -top-1 -right-1 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+            {{ cart_count }}
+          </span>
           {% endif %}
+          <span class="absolute bottom-0 left-0 w-0 h-1 bg-green-300 group-hover:w-full transition-all"></span>
+        </a>
+        {% if user and user.is_admin %}
+        <a href="{{ url_for('admin_messages') }}" class="group relative py-2 px-3 font-medium hover:text-green-200">
+          Сообщения
+          <span class="absolute bottom-0 left-0 w-0 h-1 bg-green-300 group-hover:w-full transition-all"></span>
+        </a>
+        {% endif %}
+      </div>
 
-          <!-- Профиль / Личный кабинет -->
-          {% if user %}
-            <!-- Если пользователь авторизован, показываем выпадающее меню -->
-            <div x-data="{ open: false }" class="relative">
-              <button @click="open = !open" class="flex items-center text-white hover:text-green-200 transition-colors duration-200" title="Профиль">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                    d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <div x-show="open" @click.away="open = false" x-transition class="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow-lg z-50">
-                <a href="{{ url_for('profile') }}" class="block px-4 py-2 text-gray-800 hover:bg-green-100">Личный кабинет</a>
-                {% if user and user.is_admin %}
-                <a href="{{ url_for('admin_panel') }}" class="block px-4 py-2 text-gray-800 hover:bg-green-100">Панель админа</a>
-                {% endif %}
-
-                <a href="{{ url_for('logout') }}" class="block px-4 py-2 text-gray-800 hover:bg-green-100">Выйти</a>
-              </div>
-            </div>
-          {% else %}
-            <a href="{{ url_for('login') }}" class="flex items-center text-white hover:text-green-200 transition-colors duration-200" title="Профиль">
-              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <!-- Search + Profile (Desktop) -->
+      <div class="hidden md:flex md:items-center md:space-x-6">
+        <!-- Search Toggle -->
+        <div class="relative">
+          <button @click="searchOpen = !searchOpen" class="p-1 rounded-full hover:bg-green-800 focus:outline-none">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-4.35-4.35M11 19a8 8 0 100-16 8 8 0 000 16z"/>
+            </svg>
+          </button>
+          <div x-show="searchOpen" @click.away="searchOpen = false"
+               x-transition class="absolute right-0 mt-2 w-64 bg-white rounded-lg shadow-lg p-2 flex">
+            <input type="text" placeholder="Поиск..." class="w-full p-2 rounded-l-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-green-500 text-gray-900"/>
+            <button class="bg-green-500 px-3 rounded-r-lg hover:bg-green-600 focus:outline-none">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none"
+                   viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                  d="M5.121 17.804A9 9 0 0112 15a9 9 0 016.879 2.804M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                      d="M5 13l4 4L19 7"/>
               </svg>
-              <span>Войти</span>
-            </a>
-          {% endif %}
-
+            </button>
+          </div>
         </div>
+
+        {% if user %}
+        <!-- Profile Dropdown -->
+        <div class="relative" x-data="{ profileOpen: false }" @click.away="profileOpen = false">
+          <button @click="profileOpen = !profileOpen"
+                  class="flex items-center hover:text-green-200 focus:outline-none space-x-1">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="currentColor"
+                 viewBox="0 0 24 24">
+              <path d="M12 12a5 5 0 100-10 5 5 0 000 10zm0 2c-4 0-8 2-8 6v2h16v-2c0-4-4-6-8-6z"/>
+            </svg>
+            <span>{{ user.username }}</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none"
+                 viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M19 9l-7 7-7-7"/>
+            </svg>
+          </button>
+          <div x-show="profileOpen" x-transition
+               class="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-lg py-1">
+            <a href="{{ url_for('profile') }}" class="block px-4 py-2 hover:bg-green-100">Профиль</a>
+            {% if user.is_admin %}
+            <a href="{{ url_for('admin_panel') }}" class="block px-4 py-2 hover:bg-green-100">Админка</a>
+            {% endif %}
+            <a href="{{ url_for('logout') }}" class="block px-4 py-2 hover:bg-green-100">Выйти</a>
+          </div>
+        </div>
+        {% else %}
+        <a href="{{ url_for('login') }}" class="px-4 py-2 bg-green-600 rounded-full hover:bg-green-700 transition">
+          Войти
+        </a>
+        {% endif %}
       </div>
-      <!-- Мобильное меню (опционально) -->
+
+      <!-- Mobile Menu Button -->
       <div class="md:hidden">
-        <button type="button" class="text-white hover:text-green-200 focus:outline-none focus:text-green-200">
-          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+        <button @click="open = !open" class="p-1 rounded-full hover:bg-green-800 focus:outline-none">
+          <svg x-show="!open" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M4 6h16M4 12h16M4 18h16"/>
+          </svg>
+          <svg x-show="open" xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none"
+               viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M6 18L18 6M6 6l12 12"/>
           </svg>
         </button>
       </div>
     </div>
+  </div>
+
+  <!-- Mobile Menu -->
+  <div x-show="open" x-transition class="md:hidden bg-green-800">
+    <a href="{{ url_for('shop_home') }}" class="block px-4 py-3 hover:bg-green-700">Главная</a>
+    <a href="{{ url_for('catalog') }}" class="block px-4 py-3 hover:bg-green-700">Каталог</a>
+    <a href="{{ url_for('view_cart') }}" class="relative block px-4 py-3 hover:bg-green-700">
+      Корзина
+      {% if cart_count > 0 %}
+      <span class="absolute top-2 right-4 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-red-600 rounded-full">
+        {{ cart_count }}
+      </span>
+      {% endif %}
+    </a>
+    {% if user and user.is_admin %}
+    <a href="{{ url_for('admin_messages') }}" class="block px-4 py-3 hover:bg-green-700">Сообщения</a>
+    {% endif %}
+    {% if user %}
+      <a href="{{ url_for('profile') }}" class="block px-4 py-3 hover:bg-green-700">Профиль</a>
+      <a href="{{ url_for('logout') }}" class="block px-4 py-3 hover:bg-green-700">Выйти</a>
+    {% else %}
+      <a href="{{ url_for('login') }}" class="block px-4 py-3 hover:bg-green-700">Войти</a>
+    {% endif %}
   </div>
 </nav>
