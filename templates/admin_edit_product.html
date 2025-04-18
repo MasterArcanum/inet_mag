@@ -6,7 +6,6 @@
 
 
   <div class="flex min-h-screen bg-gray-100" x-data="{ openPreview: false }">
-    <!-- Sidebar -->
     <aside class="w-64 bg-white shadow-lg">
       <div class="p-6">
         <h2 class="text-2xl font-bold text-gray-800">Панель администратора</h2>
@@ -48,8 +47,6 @@
         </ul>
       </nav>
     </aside>
-
-    <!-- Main Content -->
     <main class="flex-1 p-8">
       <!-- Header -->
       <div class="flex justify-between items-center mb-6">
@@ -59,7 +56,6 @@
         </a>
       </div>
 
-      <!-- Form -->
       <div class="bg-white rounded-2xl shadow-lg p-6 max-w-3xl mx-auto">
         <form action="{{ url_for('edit_product', product_id=product.id) }}" method="post" enctype="multipart/form-data" class="space-y-6">
           <div>
@@ -114,8 +110,6 @@
           </div>
         </form>
       </div>
-
-      <!-- Preview Modal -->
       <div x-show="openPreview" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-60 z-50" x-transition>
         <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full relative overflow-hidden">
           <div class="flex justify-between items-center bg-gray-100 px-4 py-3 border-b">

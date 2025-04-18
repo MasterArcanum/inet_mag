@@ -4,7 +4,6 @@
 
 {% block content %}
 <div class="flex min-h-screen">
-    <!-- Сайдбар -->
     <aside class="w-64 bg-white shadow-lg">
         <div class="p-6">
             <h2 class="text-2xl font-bold text-gray-800">Панель администратора</h2>
@@ -47,12 +46,10 @@
         </nav>
     </aside>
 
-    <!-- Основной контент -->
     <div class="flex-1 bg-gray-100 py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
             <h1 class="text-4xl font-semibold text-gray-800">Управление заказами</h1>
 
-            <!-- Фильтры -->
             <div class="flex flex-col sm:flex-row sm:space-x-6 mb-6 items-center">
                 <div class="flex items-center space-x-3">
                     <label for="status_filter" class="text-sm font-medium text-gray-700">Статус заказа:</label>
@@ -68,7 +65,6 @@
                 </button>
             </div>
 
-            <!-- Таблица заказов -->
             {% if orders %}
                 <div class="overflow-x-auto bg-white shadow-lg rounded-lg p-6">
                     <table class="min-w-full text-center table-auto">

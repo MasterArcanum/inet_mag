@@ -14,10 +14,8 @@
 </head>
 <body class="bg-gray-100 flex flex-col min-h-screen">
 
-  {# --- Навигация --- #}
   {% include 'navbar.html' %}
 
-  {# --- Флеш‑сообщения --- #}
   {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
       <div id="flash-container"
@@ -35,15 +33,12 @@
     {% endif %}
   {% endwith %}
 
-  {# --- Основной контент --- #}
   <div class="flex-grow">
     {% block content %}{% endblock %}
   </div>
 
-  {# --- Футер --- #}
   {% include 'footer.html' %}
 
-  {# --- Скрипт плавного исчезания флешей --- #}
   <script>
     setTimeout(function() {
       document.querySelectorAll('.flash-message').forEach(function(el) {

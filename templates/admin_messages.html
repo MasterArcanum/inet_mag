@@ -5,7 +5,6 @@
 {% block content %}
 
   <div class="flex min-h-screen bg-gray-100" x-data="{ filter: 'all' }">
-    <!-- Sidebar -->
     <aside class="w-64 bg-white shadow-lg">
       <div class="p-6">
         <h2 class="text-2xl font-bold text-gray-800">Панель администратора</h2>
@@ -14,7 +13,6 @@
         <ul>
           <li class="mb-2">
             <a href="{{ url_for('manage_products') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-200 transition-colors rounded-lg">
-              <!-- Shopping Bag Icon -->
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 11h14l1 9H4l1-9z" />
               </svg>
@@ -23,7 +21,6 @@
           </li>
           <li class="mb-2">
             <a href="{{ url_for('manage_categories') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-200 transition-colors rounded-lg">
-              <!-- Tag Icon -->
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7a1 1 0 011-1h3l8 8-6 6-8-8V8a1 1 0 011-1z" />
               </svg>
@@ -32,7 +29,6 @@
           </li>
           <li class="mb-2">
             <a href="{{ url_for('manage_orders') }}" class="flex items-center px-6 py-3 text-gray-700 hover:bg-gray-200 transition-colors rounded-lg">
-              <!-- Clipboard List Icon -->
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5h6M9 3h6a2 2 0 012 2v2a2 2 0 01-2 2H9a2 2 0 01-2-2V5a2 2 0 012-2z M9 13h6m-6 4h6m-6 4h6" />
               </svg>
@@ -41,7 +37,6 @@
           </li>
           <li class="mb-2">
             <a href="{{ url_for('admin_messages') }}" class="flex items-center px-6 py-3 bg-gray-200 text-gray-900 rounded-lg">
-              <!-- Chat Icon -->
               <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-3 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 10h.01M12 10h.01M16 10h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4-.8L3 20l1.8-4A7.968 7.968 0 013 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
               </svg>
@@ -52,7 +47,6 @@
       </nav>
     </aside>
 
-    <!-- Main Content -->
     <main class="flex-1 p-8">
       <!-- Header and Filters -->
       <div class="flex items-center justify-between mb-6">
@@ -76,7 +70,6 @@
         </div>
       </div>
 
-      <!-- Messages List -->
       <ul class="space-y-4">
         {% for msg in messages %}
         <li x-data="{ answered: {{ 'true' if msg.answered else 'false' }} }"

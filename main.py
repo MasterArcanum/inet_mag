@@ -783,6 +783,20 @@ def checkout():
                            images=images)
 
 
+@app.route('/search_products', methods=['GET'])
+def search_products():
+    query = request.args.get('query', '').strip()  # Получаем строку поиска из параметра запроса
+    if query:
+        # Ищем товары по имени или описанию
+        products = db.session.query(Product).filter(
+            Product.name.ilike(f'%{query}%') | Product.description.ilike(f'%{query}%')
+        ).all()
+    else:
+        products = []
+
+    return render_template('search_results.html', products=products)
+
+
 
 if __name__ == '__main__':
     app.run(host="0.0.0.0", debug=True)

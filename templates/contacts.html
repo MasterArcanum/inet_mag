@@ -8,12 +8,9 @@
   <div class="flex min-h-screen bg-gray-100">
     <main class="flex-1 p-8">
       <div class="max-w-5xl mx-auto space-y-12">
-        <!-- Page Title -->
         <h1 class="text-4xl font-bold text-gray-800 text-center">Контакты</h1>
 
-        <!-- Content Grid -->
         <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-          <!-- Contact Info Card -->
           <div class="bg-white rounded-2xl shadow-lg p-8 space-y-4">
             <h2 class="text-2xl font-semibold text-gray-800">Наши контакты</h2>
             <p class="text-gray-700"><span class="font-medium">Адрес:</span> ул. Примерная, 123, Москва, Россия</p>
@@ -27,8 +24,6 @@
               </iframe>
             </div>
           </div>
-
-          <!-- Message Form Card -->
           <div class="bg-white rounded-2xl shadow-lg p-8 space-y-6">
             <h2 class="text-2xl font-semibold text-gray-800">Напишите нам</h2>
             <form action="{{ url_for('contacts') }}" method="post" class="space-y-4">
