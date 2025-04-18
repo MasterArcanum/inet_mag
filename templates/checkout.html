@@ -1,30 +1,69 @@
 {% extends "layout.html" %}
-{% block title %}Оформление заказа{% endblock %}
-
+{% block title %}Подтверждение заказа{% endblock %}
 {% block content %}
-  <div class="container mx-auto mt-8 px-4">
-    <h1 class="text-4xl font-bold text-gray-800 mb-6">Оформление заказа</h1>
+<div class="bg-gray-100 py-10 min-h-screen">
+  <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h1 class="text-4xl font-bold mb-6">Подтверждение заказа</h1>
 
-    <div class="bg-white shadow-lg rounded-2xl p-6 space-y-6">
-      <h2 class="text-2xl font-semibold">Ваши товары</h2>
-      <ul class="space-y-4">
+    <!-- 1. Контактные данные -->
+    <div class="bg-white rounded-lg shadow p-6 mb-8">
+      <h2 class="text-2xl font-semibold mb-4">Ваши данные для доставки</h2>
+      <p><span class="font-medium">Телефон:</span> {{ user.phone or 'Не указан' }}</p>
+      <p><span class="font-medium">Адрес:</span>
+        {% if user.city and user.street and user.house %}
+          {{ user.city }}, ул. {{ user.street }}, д. {{ user.house }}
+          {% if not user.private_house and user.apartment %}, кв. {{ user.apartment }}{% endif %}
+        {% else %}
+          Не указан
+        {% endif %}
+      </p>
+    </div>
+
+    {% if missing_info %}
+      <div class="bg-yellow-100 border-l-4 border-yellow-400 text-yellow-700 p-4 mb-6">
+        <p>Пожалуйста, заполните в профиле телефон и полный адрес доставки, чтобы завершить заказ.</p>
+      </div>
+    {% endif %}
+
+    {% if items %}
+      <!-- здесь ваш цикл по товарам, используя images[item.product.id] -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
         {% for item in items %}
-        <li class="flex justify-between items-center">
-          <span>{{ item.product.name }} × {{ item.quantity }}</span>
-          <span class="font-semibold">₽{{ '%.2f'|format(item.quantity * item.product.price) }}</span>
-        </li>
+          {% set img = images[item.product.id] %}
+          {% set subtotal = item.quantity * item.product.price %}
+          <div class="bg-white rounded-2xl shadow-md overflow-hidden">
+            <div class="h-48 overflow-hidden">
+              {% if img %}
+                <img src="data:{{ img.file_type }};base64,{{ img.data_base64 }}"
+                     class="w-full h-full object-cover" />
+              {% else %}
+                <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                  <span class="text-gray-500">Нет изображения</span>
+                </div>
+              {% endif %}
+            </div>
+            <div class="p-4">
+              <h3 class="text-lg font-semibold">{{ item.product.name }}</h3>
+              <p class="mt-2 text-gray-600">₽{{ item.product.price }} × {{ item.quantity }} = ₽{{ '%.2f'|format(subtotal) }}</p>
+            </div>
+          </div>
         {% endfor %}
-      </ul>
-      <div class="text-right text-xl font-bold mt-4">
-        Общая сумма: ₽{{ '%.2f'|format(total) }}
       </div>
 
-      <form method="post" class="mt-6 flex justify-end">
-        <button type="submit"
-                class="bg-green-800 text-white px-8 py-3 rounded-full hover:bg-green-700 transition">
-          Подтвердить заказ
-        </button>
-      </form>
-    </div>
+      <!-- Общая сумма и кнопка -->
+      <div class="flex justify-between items-center mt-8">
+        <span class="text-2xl font-bold">Итого: ₽{{ '%.2f'|format(total) }}</span>
+        <form method="post">
+          <button type="submit"
+                  class="bg-green-800 text-white px-6 py-3 rounded-full hover:bg-green-700 transition"
+                  {% if missing_info %}disabled opacity-50 cursor-not-allowed{% endif %}>
+            Оформить заказ
+          </button>
+        </form>
+      </div>
+    {% else %}
+      <p class="text-gray-700">В вашей корзине нет товаров.</p>
+    {% endif %}
   </div>
+</div>
 {% endblock %}

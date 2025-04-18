@@ -1,15 +1,84 @@
 {% extends "layout.html" %}
 
-{% block title %}Главная страница магазина{% endblock %}
+{% block title %}Добро пожаловать в ShopStyle{% endblock %}
 
 {% block content %}
-  <div class="container mx-auto mt-8 px-4">
-    {% if user %}
-      <h1 class="text-4xl font-bold mb-4 text-gray-800">Добро пожаловать, {{ user.username }}!</h1>
-    {% else %}
-      <h1 class="text-4xl font-bold mb-4 text-gray-800">Добро пожаловать в магазин!</h1>
-    {% endif %}
-    <p class="text-gray-700 text-lg">Это временная страница-заглушка. Здесь будут отображаться товары и другая информация.</p>
-  </div>
+<!-- Hero section -->
+<div class="hero bg-cover bg-center relative" style="background-image: url('{{ url_for('static', filename='img/_11__.png') }}');">
+    <div class="absolute inset-0 bg-black opacity-50"></div>
+    <div class="container mx-auto text-center text-white relative z-10 py-32">
+        <h1 class="text-4xl font-bold mb-6">ShopStyle - Стильная мебель для вашего дома</h1>
+        <p class="text-lg mb-8">Дизайн, который создаёт уют в вашем доме. Найдите идеальную мебель с доставкой на дом.</p>
+        <a href="{{ url_for('shop_home') }}" class="bg-green-800 py-2 px-6 text-white rounded-full text-lg hover:bg-green-700 transition">Начать покупки</a>
+    </div>
+</div>
+
+<!-- Best offers section -->
+<div class="bg-white py-16">
+    <div class="container mx-auto text-center">
+        <h2 class="text-3xl font-semibold mb-8 text-green-800">Наши лучшие предложения</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+                <img src="{{ url_for('static', filename='img/47828.970.jpeg') }}" alt="Изображение товара" class="w-full h-64 object-cover rounded-lg mb-4">
+                <h3 class="text-xl font-semibold mb-2 text-green-800">Комфортный диван</h3>
+                <p class="text-gray-600">Элегантный и удобный диван для вашего дома. Воплощение стиля и комфорта.</p>
+                <a href="{{ url_for('catalog') }}" class="text-green-600 mt-4 inline-block">Посмотреть товар</a>
+            </div>
+            <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+                <img src="{{ url_for('static', filename='img/i.webp') }}" alt="Изображение товара" class="w-full h-64 object-cover rounded-lg mb-4">
+                <h3 class="text-xl font-semibold mb-2 text-green-800">Элегантные кресла</h3>
+                <p class="text-gray-600">Добавьте шик и уют в любой интерьер с нашими эксклюзивными креслами.</p>
+                <a href="{{ url_for('catalog') }}" class="text-green-600 mt-4 inline-block">Посмотреть товар</a>
+            </div>
+            <div class="bg-gray-100 p-6 rounded-lg shadow-md">
+                <img src="{{ url_for('static', filename='img/onMqMiPJkvE5wzM7RvTLGi-1280-80.jpg') }}" alt="Изображение товара" class="w-full h-64 object-cover rounded-lg mb-4">
+                <h3 class="text-xl font-semibold mb-2 text-green-800">Уютные спальни</h3>
+                <p class="text-gray-600">Создайте атмосферу спокойствия и уюта с нашей мебелью для спальни.</p>
+                <a href="{{ url_for('catalog') }}" class="text-green-600 mt-4 inline-block">Посмотреть товар</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Why choose us section -->
+<!-- Why choose us section -->
+<div class="bg-green-800 text-white py-16">
+    <div class="container mx-auto text-center">
+        <h2 class="text-3xl font-semibold mb-8">Почему выбирают нас?</h2>
+        <div class="flex justify-center gap-8">
+            <div class="w-1/3">
+                <div class="h-64 overflow-hidden mb-4">
+                    <img src="{{ url_for('static', filename='img/register.webp') }}" alt="Изображение" class="w-full h-full object-cover rounded-lg">
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Быстрая доставка</h3>
+                <p>Мы обеспечим доставку вашей мебели в кратчайшие сроки по всей территории страны.</p>
+            </div>
+            <div class="w-1/3">
+                <div class="h-64 overflow-hidden mb-4">
+                    <img src="{{ url_for('static', filename='img/i (2).webp') }}" alt="Изображение" class="w-full h-full object-cover rounded-lg">
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Качество</h3>
+                <p>Вся наша мебель производится из высококачественных материалов, чтобы гарантировать долговечность и комфорт.</p>
+            </div>
+            <div class="w-1/3">
+                <div class="h-64 overflow-hidden mb-4">
+                    <img src="{{ url_for('static', filename='img/s1200.jfif') }}" alt="Изображение" class="w-full h-full object-cover rounded-lg">
+                </div>
+                <h3 class="font-semibold text-lg mb-2">Удобство</h3>
+                <p>Вы можете заказать мебель онлайн с доставкой на дом. Просто выберите и оформите заказ!</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- About us section -->
+<div class="py-16 bg-gray-100">
+    <div class="container mx-auto text-center">
+        <h2 class="text-3xl font-semibold mb-8 text-green-800">О нас</h2>
+        <p class="text-lg mb-8">ShopStyle - это онлайн-магазин, который предлагает вам лучшие мебельные решения для вашего дома. Мы предоставляем стильную и качественную мебель, которая идеально подходит для любого интерьера. Наши товары - это сочетание элегантности, комфорта и долговечности. Мы уверены, что каждый найдет у нас что-то для себя!</p>
+        <a href="{{ url_for('contacts') }}" class="bg-green-800 py-2 px-6 text-white rounded-full text-lg hover:bg-green-700 transition">Связаться с нами</a>
+    </div>
+</div>
 
 {% endblock %}

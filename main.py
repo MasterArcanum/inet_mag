@@ -136,10 +136,24 @@ with app.app_context():
 # --------------------
 # Маршруты авторизации и основных страниц
 # --------------------
-@app.route('/')
-def index():
-    # При обращении к корню перенаправляем на главную страницу магазина.
-    return redirect(url_for('shop_home'))
+@app.route('/shop')
+def shop_home():
+    # Получаем 6 первых товаров для отображения
+    products = Product.query.order_by(Product.id.desc()).limit(6).all()
+    # Берём все категории (если понадобятся где‑то на главной)
+    categories = Category.query.order_by(Category.name).all()
+    # Для каждого товара достаём первое изображение
+    images = {
+        p.id: ProductFile.query.filter_by(product_id=p.id).first()
+        for p in products
+    }
+    return render_template(
+        'shop.html',
+        products=products,
+        categories=categories,
+        images=images
+    )
+
 
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -199,13 +213,6 @@ def profile():
     return render_template('profile.html')
 
 
-
-
-
-@app.route('/shop')
-def shop_home():
-    # Если вы используете контекстный процессор, переменная user доступна в шаблоне.
-    return render_template('shop.html')
 
 
 @app.route('/logout')
@@ -590,12 +597,17 @@ def view_cart():
         flash('Пожалуйста, войдите, чтобы посмотреть корзину.', 'error')
         return redirect(url_for('login'))
     items = CartItem.query.filter_by(user_id=session['user_id']).all()
-    images = {}
-    for item in items:
-        img = ProductFile.query.filter_by(product_id=item.product_id).first()
-        images[item.product_id] = img
+    images = {
+        item.product_id: ProductFile.query.filter_by(product_id=item.product_id).first()
+        for item in items
+    }
+    total = sum(item.quantity * float(item.product.price) for item in items)
 
-    return render_template('cart.html', items=items, images=images)
+    return render_template('cart.html',
+                           items=items,
+                           images=images,
+                           total=total)
+
 
 
 @app.route('/cart/add/<int:product_id>', methods=['POST'])
@@ -640,35 +652,48 @@ def checkout():
         flash('Пожалуйста, войдите, чтобы оформить заказ.', 'error')
         return redirect(url_for('login'))
 
-    user_id = session['user_id']
-    items = CartItem.query.filter_by(user_id=user_id).all()
-    if not items:
-        flash('Корзина пуста.', 'error')
-        return redirect(url_for('catalog'))
+    user = User.query.get(session['user_id'])
+    items = CartItem.query.filter_by(user_id=user.id).all()
+    total = sum(item.quantity * float(item.product.price) for item in items)
 
-    total = sum(item.quantity * item.product.price for item in items)
+    # Проверяем, заполнены ли телефон и адрес
+    missing_info = not (user.phone and user.city and user.street and user.house)
+
+    # Собираем словарь изображений для каждого товара
+    images = {}
+    for item in items:
+        img = ProductFile.query.filter_by(product_id=item.product_id).first()
+        images[item.product_id] = img
 
     if request.method == 'POST':
-        # Создаём заказ
-        order = Order(user_id=user_id)
-        db.session.add(order)
-        db.session.flush()  # чтобы получить order.id
+        if missing_info:
+            flash('Пожалуйста, заполните в профиле телефон и полный адрес доставки.', 'error')
+            return redirect(url_for('checkout'))
+        if not items:
+            flash('Ваша корзина пуста.', 'error')
+            return redirect(url_for('checkout'))
 
-        # Наполняем OrderItem
+        order = Order(user_id=user.id)
+        db.session.add(order)
+        db.session.flush()
         for item in items:
             db.session.add(OrderItem(
                 order_id=order.id,
                 product_id=item.product_id,
                 quantity=item.quantity
             ))
-        # Очищаем корзину
-        CartItem.query.filter_by(user_id=user_id).delete()
-
+        CartItem.query.filter_by(user_id=user.id).delete()
         db.session.commit()
         flash('Заказ успешно оформлен!', 'success')
         return redirect(url_for('shop_home'))
 
-    return render_template('checkout.html', items=items, total=total)
+    return render_template('checkout.html',
+                           user=user,
+                           items=items,
+                           total=total,
+                           missing_info=missing_info,
+                           images=images)
+
 
 
 if __name__ == '__main__':
