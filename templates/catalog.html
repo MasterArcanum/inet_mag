@@ -1,0 +1,149 @@
+{% extends "layout.html" %}
+
+{% block title %}Каталог - Modern Store{% endblock %}
+
+{% block head %}
+  <style>
+    [x-cloak] { display: none !important; }
+  </style>
+{% endblock %}
+
+{% block content %}
+
+
+  <!-- Wrapper hidden until Alpine is ready -->
+  <div x-data="{ loading: true, selectedCategory: '', priceMin: null, priceMax: null, openProduct: null }"
+       x-init="$el.style.display='block'; loading = false"
+       x-cloak
+       style="display: none;"
+       class="relative">
+
+    <!-- Preloader Overlay -->
+    <div x-show="loading" class="fixed inset-0 bg-white flex items-center justify-center z-50" x-cloak>
+      <svg class="animate-spin h-12 w-12 text-green-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"></path>
+      </svg>
+    </div>
+
+    <!-- Catalog Content -->
+    <div x-show="!loading" class="bg-gray-100 py-12" x-cloak>
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
+
+        <!-- Filters -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <!-- Category Filter -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-2">Категория</label>
+            <select x-model="selectedCategory" class="w-full border border-gray-300 rounded-lg p-2 focus:border-green-600 focus:ring focus:ring-green-200">
+              <option value="">Все категории</option>
+              {% for cat in categories %}
+              <option value="{{ cat.id }}">{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <!-- Min Price -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-2">Мин. цена</label>
+            <input type="number" x-model.number="priceMin" min="0" placeholder="0" class="w-full border border-gray-300 rounded-lg p-2 focus:border-green-600 focus:ring focus:ring-green-200" />
+          </div>
+          <!-- Max Price -->
+          <div>
+            <label class="block text-gray-700 font-medium mb-2">Макс. цена</label>
+            <input type="number" x-model.number="priceMax" min="0" placeholder="0" class="w-full border border-gray-300 rounded-lg p-2 focus:border-green-600 focus:ring focus:ring-green-200" />
+          </div>
+          <!-- Reset Button -->
+          <div class="flex items-end">
+            <button @click="selectedCategory=''; priceMin=null; priceMax=null" class="w-full bg-green-600 text-white rounded-lg py-2 hover:bg-green-700 transition">Сбросить фильтры</button>
+          </div>
+        </div>
+
+        <!-- Products Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+          {% for product in products %}
+          <div @click="openProduct = {{ product.id }}"
+               x-show="(selectedCategory=='' || selectedCategory=='{{ product.category_id }}') && (!priceMin || {{ product.price }} >= priceMin) && (!priceMax || {{ product.price }} <= priceMax)"
+               class="group bg-white rounded-2xl shadow-md overflow-hidden transform hover:shadow-xl hover:-translate-y-1 transition cursor-pointer">
+            <!-- Image -->
+            <div class="relative h-60 overflow-hidden">
+              {% if images[product.id] %}
+              <img src="data:{{ images[product.id].file_type }};base64,{{ images[product.id].data_base64 }}" alt="{{ product.name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+              {% else %}
+              <div class="w-full h-full bg-gray-200 flex items-center justify-center"><span class="text-gray-500">Нет изображения</span></div>
+              {% endif %}
+            </div>
+            <!-- Info & Actions -->
+            <div class="p-4 space-y-2">
+              <h3 class="text-lg font-semibold text-gray-800 truncate">{{ product.name }}</h3>
+              <p class="text-gray-600 text-sm line-clamp-2">{{ product.description or 'Описание отсутствует' }}</p>
+              <div class="flex items-center justify-between mt-4">
+                <span class="text-2xl font-bold text-green-700">₽{{ product.price }}</span>
+                <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="post" @click.stop>
+                  <button type="submit" class="flex items-center bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
+                    </svg>
+                    В корзину
+                  </button>
+                </form>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Features Section -->
+        <div class="mt-12 grid grid-cols-1 md:grid-cols-4 gap-6 text-center">
+          {% for feature in [
+            'Гарантия качества|Проверенные поставщики|M9 12l2 2l4-4',
+            'Бесплатная доставка|При заказе от 3000 ₽|M3 10h18M3 6h18M5 14h14l4 8H1l4-8z',
+            'Покупка в кредит|Выгодные условия|M21 7l-6 6m0 0l-6-6m6 6V3',
+            'Самовывоз|Удобные пункты выдачи|M9 20l-5-5m0 0l5-5m-5 5h12'
+          ] %}
+          {% set text, desc, path = feature.split('|') %}
+          <div class="p-6 bg-white rounded-2xl shadow-md hover:shadow-xl transition-shadow">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10 mx-auto text-green-600 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="{{ path }}" />
+            </svg>
+            <h3 class="font-semibold text-lg text-gray-800 mb-1">{{ text }}</h3>
+            <p class="text-gray-600">{{ desc }}</p>
+          </div>
+          {% endfor %}
+        </div>
+
+        <!-- Modal Detail -->
+        <div x-show="openProduct" x-transition.opacity class="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
+          <div class="bg-white rounded-2xl shadow-2xl w-full max-w-4xl overflow-auto">
+            {% for product in products %}
+            <section x-show="openProduct === {{ product.id }}" class="grid grid-cols-1 md:grid-cols-2 gap-6 p-6">
+              {% if images[product.id] %}
+              <img src="data:{{ images[product.id].file_type }};base64,{{ images[product.id].data_base64 }}" alt="{{ product.name }}" class="w-full h-96 object-cover rounded-lg" />
+              {% endif %}
+              <div class="space-y-4 flex flex-col justify-between">
+                <div>
+                  <h2 class="text-3xl font-bold text-gray-800">{{ product.name }}</h2>
+                  <p class="mt-2 text-gray-700">{{ product.description or 'Описание отсутствует' }}</p>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span class="text-3xl font-extrabold text-green-800">₽{{ product.price }}</span>
+                  <form action="{{ url_for('add_to_cart', product_id=product.id) }}" method="post">
+                    <button class="flex items-center bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9" />
+                      </svg>
+                      В корзину
+                    </button>
+                  </form>
+                </div>
+                <button @click="openProduct = null" class="self-end text-gray-500 hover:text-gray-800 mt-4 font-medium">Закрыть</button>
+              </div>
+            </section>
+            {% endfor %}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

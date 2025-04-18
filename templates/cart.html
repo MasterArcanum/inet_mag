@@ -1,0 +1,82 @@
+{% extends "layout.html" %}
+{% block title %}Моя корзина{% endblock %}
+
+{% block content %}
+
+  <div class="bg-gray-100 py-10 min-h-screen">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <h1 class="text-4xl font-bold text-gray-800">Моя корзина ({{ items|length }})</h1>
+
+      {% if items %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+          {% set total = 0 %}
+          {% for item in items %}
+            {% set subtotal = item.quantity * item.product.price %}
+            {% set total = total + subtotal %}
+            <div class="group bg-white rounded-2xl shadow-md overflow-hidden transform hover:shadow-xl hover:-translate-y-1 transition">
+              <!-- Превью карточка товара -->
+              <div class="relative h-48 overflow-hidden">
+                {% set img = images[item.product.id] %}
+                {% if img %}
+                  <img src="data:{{ img.file_type }};base64,{{ img.data_base64 }}"
+                       alt="{{ item.product.name }}"
+                       class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"/>
+                {% else %}
+                  <div class="w-full h-full bg-gray-200 flex items-center justify-center">
+                    <span class="text-gray-500">Нет изображения</span>
+                  </div>
+                {% endif %}
+                <div class="absolute top-2 right-2 bg-green-600 text-white px-3 py-1 rounded-md text-sm font-medium">
+                  ₽{{ '%.2f'|format(item.product.price) }}
+                </div>
+              </div>
+              <div class="p-6 flex flex-col justify-between">
+                <div>
+                  <h2 class="text-2xl font-semibold text-gray-800 truncate">{{ item.product.name }}</h2>
+                  <p class="mt-2 text-gray-600 text-sm line-clamp-2">
+                    {{ item.product.description or 'Описание отсутствует' }}
+                  </p>
+                </div>
+                <div class="mt-4 flex items-center justify-between">
+                  <form action="{{ url_for('update_cart', item_id=item.id) }}" method="post" class="flex items-center space-x-2">
+                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1"
+                           class="w-16 text-center border border-gray-300 rounded-lg p-1 focus:outline-none focus:border-green-600"/>
+                    <button type="submit"
+                            class="bg-green-600 text-white px-3 py-1 rounded hover:bg-green-700 transition">
+                      Обновить
+                    </button>
+                  </form>
+                  <form action="{{ url_for('remove_from_cart', item_id=item.id) }}" method="post">
+                    <button type="submit" class="text-red-500 hover:text-red-700 transition">
+                      Удалить
+                    </button>
+                  </form>
+                </div>
+                <div class="mt-3 text-gray-700 font-medium">
+                  Итого: ₽{{ '%.2f'|format(subtotal) }}
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div class="flex flex-col md:flex-row md:items-center md:justify-end mt-10 space-y-4 md:space-y-0 md:space-x-6">
+          <span class="text-2xl font-bold text-gray-800">Общая сумма: ₽{{ '%.2f'|format(total) }}</span>
+          <form action="{{ url_for('checkout') }}" method="post">
+            <button type="submit"
+                    class="flex items-center bg-green-800 text-white px-6 py-3 rounded-full hover:bg-green-700 transition">
+              <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none"
+                   viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2 9m12-9l2 9m-6-9v9"/>
+              </svg>
+              Перейти к оплате
+            </button>
+          </form>
+        </div>
+      {% else %}
+        <p class="text-gray-700">Ваша корзина пуста.</p>
+      {% endif %}
+    </div>
+  </div>
+{% endblock %}

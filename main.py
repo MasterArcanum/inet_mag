@@ -1,10 +1,11 @@
 import os
-from flask import Flask, render_template, request, redirect, url_for, flash, session
+from datetime import datetime
+from flask import Flask, render_template, request, redirect, url_for, flash, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy import func
 from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash, check_password_hash
 import base64
-from datetime import datetime
 
 
 load_dotenv()
@@ -16,6 +17,24 @@ app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
+
+
+@app.context_processor
+def inject_globals():
+    user = None
+    cart_count = 0
+    if 'user_id' in session:
+        user = User.query.get(session['user_id'])
+        cart_count = db.session.query(
+            func.coalesce(func.sum(CartItem.quantity), 0)
+        ).filter(CartItem.user_id == user.id).scalar()
+    return {
+        'user': user,
+        'cart_count': cart_count,
+        'current_year': datetime.utcnow().year
+    }
+
+
 
 # --------------------
 # Модели
@@ -77,21 +96,41 @@ class Message(db.Model):
     answered = db.Column(db.Boolean, default=False, nullable=False)
 
 
+#Корзина
+class CartItem(db.Model):
+    __tablename__ = 'cart_items'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    quantity = db.Column(db.Integer, default=1, nullable=False)
+
+    user = db.relationship('User', backref=db.backref('cart_items', lazy='dynamic'))
+    product = db.relationship('Product')
+
+
+
+class Order(db.Model):
+    __tablename__ = 'orders'
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    order_date = db.Column(db.DateTime, default=datetime.utcnow)
+    status = db.Column(db.String(50), default='pending')
+
+class OrderItem(db.Model):
+    __tablename__ = 'order_items'
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+
+
+
 
 # Создаем таблицы, если они еще не созданы
 with app.app_context():
     db.create_all()
 
 
-# --------------------
-# Контекстный процессор
-# --------------------
-@app.context_processor
-def inject_user():
-    user = None
-    if 'user_id' in session:
-        user = User.query.get(session['user_id'])
-    return dict(user=user)
 
 
 # --------------------
@@ -378,31 +417,31 @@ def view_product(product_id):
 
 
 
-
-@app.route('/change-password', methods=['GET', 'POST'])
-def change_password():
-    if 'user_id' not in session:
-        flash('Пожалуйста, войдите в систему.', 'error')
-        return redirect(url_for('login'))
-    if request.method == 'POST':
-        # Получаем данные формы
-        old_password = request.form.get('old_password')
-        new_password = request.form.get('new_password')
-        confirm_password = request.form.get('confirm_password')
-        user = User.query.get(session['user_id'])
-        if not user.check_password(old_password):
-            flash('Старый пароль не верный.', 'error')
-            return redirect(url_for('change_password'))
-        if new_password != confirm_password:
-            flash('Новый пароль не совпадает.', 'error')
-            return redirect(url_for('change_password'))
-        # Обновляем пароль (не забудьте хешировать новый пароль)
-        user.password_hash = generate_password_hash(new_password)
-        db.session.commit()
-        flash('Пароль успешно изменён.', 'success')
-        return redirect(url_for('profile'))
-    return render_template('change_password.html')
-
+#
+# @app.route('/change-password', methods=['GET', 'POST'])
+# def change_password():
+#     if 'user_id' not in session:
+#         flash('Пожалуйста, войдите в систему.', 'error')
+#         return redirect(url_for('login'))
+#     if request.method == 'POST':
+#         # Получаем данные формы
+#         old_password = request.form.get('old_password')
+#         new_password = request.form.get('new_password')
+#         confirm_password = request.form.get('confirm_password')
+#         user = User.query.get(session['user_id'])
+#         if not user.check_password(old_password):
+#             flash('Старый пароль не верный.', 'error')
+#             return redirect(url_for('change_password'))
+#         if new_password != confirm_password:
+#             flash('Новый пароль не совпадает.', 'error')
+#             return redirect(url_for('change_password'))
+#         # Обновляем пароль (не забудьте хешировать новый пароль)
+#         user.password_hash = generate_password_hash(new_password)
+#         db.session.commit()
+#         flash('Пароль успешно изменён.', 'success')
+#         return redirect(url_for('profile'))
+#     return render_template('change_password.html')
+#
 
 @app.route('/profile/edit', methods=['GET', 'POST'])
 def edit_profile():
@@ -499,6 +538,137 @@ def mark_answered(message_id):
     db.session.commit()
     flash('Сообщение отмечено как отвеченное.', 'success')
     return redirect(url_for('admin_messages'))
+
+
+
+@app.route('/change-password', methods=['GET', 'POST'])
+def change_password():
+    # Если пользователь не залогинен
+    if 'user_id' not in session:
+        flash('Пожалуйста, войдите в систему.', 'error')
+        return redirect(url_for('login'))
+
+    user = User.query.get(session['user_id'])
+    if request.method == 'POST':
+        old = request.form['old_password']
+        new = request.form['new_password']
+        confirm = request.form['confirm_password']
+
+        if not user.check_password(old):
+            flash('Старый пароль неверен.', 'error')
+            return redirect(url_for('change_password'))
+
+        if new != confirm:
+            flash('Пароли не совпадают.', 'error')
+            return redirect(url_for('change_password'))
+
+        user.password_hash = generate_password_hash(new)
+        db.session.commit()
+
+        flash('Пароль успешно изменён.', 'success')
+        return redirect(url_for('profile'))
+
+    return render_template('change_password.html')
+
+
+@app.route('/catalog')
+def catalog():
+    # Получаем категории и товары
+    categories = Category.query.order_by(Category.name).all()
+    products = Product.query.order_by(Product.name).all()
+    # Для каждого товара берём первое изображение (если есть)
+    images = {}
+    for p in products:
+        img = ProductFile.query.filter_by(product_id=p.id).first()
+        images[p.id] = img
+    return render_template('catalog.html', categories=categories, products=products, images=images)
+
+
+@app.route('/cart')
+def view_cart():
+    if 'user_id' not in session:
+        flash('Пожалуйста, войдите, чтобы посмотреть корзину.', 'error')
+        return redirect(url_for('login'))
+    items = CartItem.query.filter_by(user_id=session['user_id']).all()
+    images = {}
+    for item in items:
+        img = ProductFile.query.filter_by(product_id=item.product_id).first()
+        images[item.product_id] = img
+
+    return render_template('cart.html', items=items, images=images)
+
+
+@app.route('/cart/add/<int:product_id>', methods=['POST'])
+def add_to_cart(product_id):
+    if 'user_id' not in session:
+        return jsonify({'error': 'Unauthorized'}), 401
+    user_id = session['user_id']
+    item = CartItem.query.filter_by(user_id=user_id, product_id=product_id).first()
+    if item:
+        item.quantity += 1
+    else:
+        item = CartItem(user_id=user_id, product_id=product_id, quantity=1)
+        db.session.add(item)
+    db.session.commit()
+    flash('Товар добавлен в корзину.', 'success')
+    return redirect(request.referrer or url_for('catalog'))
+
+@app.route('/cart/update/<int:item_id>', methods=['POST'])
+def update_cart(item_id):
+    qty = int(request.form.get('quantity', 1))
+    item = CartItem.query.get_or_404(item_id)
+    if qty < 1:
+        db.session.delete(item)
+    else:
+        item.quantity = qty
+    db.session.commit()
+    return redirect(url_for('view_cart'))
+
+@app.route('/cart/remove/<int:item_id>', methods=['POST'])
+def remove_from_cart(item_id):
+    item = CartItem.query.get_or_404(item_id)
+    db.session.delete(item)
+    db.session.commit()
+    flash('Товар удалён из корзины.', 'info')
+    return redirect(url_for('view_cart'))
+
+
+
+@app.route('/checkout', methods=['GET', 'POST'])
+def checkout():
+    if 'user_id' not in session:
+        flash('Пожалуйста, войдите, чтобы оформить заказ.', 'error')
+        return redirect(url_for('login'))
+
+    user_id = session['user_id']
+    items = CartItem.query.filter_by(user_id=user_id).all()
+    if not items:
+        flash('Корзина пуста.', 'error')
+        return redirect(url_for('catalog'))
+
+    total = sum(item.quantity * item.product.price for item in items)
+
+    if request.method == 'POST':
+        # Создаём заказ
+        order = Order(user_id=user_id)
+        db.session.add(order)
+        db.session.flush()  # чтобы получить order.id
+
+        # Наполняем OrderItem
+        for item in items:
+            db.session.add(OrderItem(
+                order_id=order.id,
+                product_id=item.product_id,
+                quantity=item.quantity
+            ))
+        # Очищаем корзину
+        CartItem.query.filter_by(user_id=user_id).delete()
+
+        db.session.commit()
+        flash('Заказ успешно оформлен!', 'success')
+        return redirect(url_for('shop_home'))
+
+    return render_template('checkout.html', items=items, total=total)
 
 
 if __name__ == '__main__':
