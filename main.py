@@ -35,10 +35,6 @@ def inject_globals():
     }
 
 
-
-# --------------------
-# Модели
-# --------------------
 class User(db.Model):
     __tablename__ = 'users'
     id = db.Column(db.Integer, primary_key=True)
@@ -89,14 +85,14 @@ class ProductFile(db.Model):
 class Message(db.Model):
     __tablename__ = 'messages'
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # Сообщения принадлежат пользователю
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     subject = db.Column(db.String(150))
     message = db.Column(db.Text, nullable=False)
     sent_at = db.Column(db.DateTime, server_default=db.func.current_timestamp(), nullable=False)
     answered = db.Column(db.Boolean, default=False, nullable=False)
 
 
-#Корзина
+
 class CartItem(db.Model):
     __tablename__ = 'cart_items'
     id = db.Column(db.Integer, primary_key=True)
@@ -114,7 +110,7 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(50), default='pending')  # Статус заказа: pending, completed, canceled
+    status = db.Column(db.String(50), default='pending')
     phone = db.Column(db.String(20))
     city = db.Column(db.String(100))
     street = db.Column(db.String(255))
@@ -133,25 +129,14 @@ class OrderItem(db.Model):
     product = db.relationship('Product')
 
 
-
-
-# Создаем таблицы, если они еще не созданы
 with app.app_context():
     db.create_all()
 
 
-
-
-# --------------------
-# Маршруты авторизации и основных страниц
-# --------------------
 @app.route('/shop')
 def shop_home():
-    # Получаем 6 первых товаров для отображения
     products = Product.query.order_by(Product.id.desc()).limit(6).all()
-    # Берём все категории (если понадобятся где‑то на главной)
     categories = Category.query.order_by(Category.name).all()
-    # Для каждого товара достаём первое изображение
     images = {
         p.id: ProductFile.query.filter_by(product_id=p.id).first()
         for p in products
@@ -218,7 +203,6 @@ def profile():
     if 'user_id' not in session:
         flash('Пожалуйста, войдите в систему для доступа к профилю.', 'error')
         return redirect(url_for('login'))
-    # Заглушка для страницы профиля
     return render_template('profile.html')
 
 
@@ -231,11 +215,7 @@ def logout():
     return redirect(url_for('login'))
 
 
-# --------------------
-# Маршруты админ-панели
-# --------------------
 def admin_required():
-    # Простая проверка прав администратора.
     if 'user_id' not in session:
         flash('Пожалуйста, войдите в систему.', 'error')
         return False
@@ -257,7 +237,6 @@ def admin_panel():
 def manage_products():
     if not admin_required():
         return redirect(url_for('login'))
-    # Здесь вы можете добавить логику для получения списка товаров из базы
     products = Product.query.all()
     return render_template('admin_products.html', products=products)
 
@@ -310,7 +289,6 @@ def edit_product(product_id):
     if not admin_required():
         return redirect(url_for('login'))
     product = Product.query.get_or_404(product_id)
-    # Получаем все прикреплённые файлы для данного продукта
     product_files = ProductFile.query.filter_by(product_id=product.id).all()
 
     if request.method == 'POST':
@@ -321,14 +299,11 @@ def edit_product(product_id):
         product.category_id = request.form.get('category_id')
         db.session.commit()
 
-        # Если админ загрузил новый файл, удалим существующие (опционально)
         uploaded_files = request.files.getlist('files')
         if uploaded_files and any(f.filename for f in uploaded_files):
-            # Удаляем старые файлы (при желании можно реализовать логику замены для конкретного файла)
             for pf in product_files:
                 db.session.delete(pf)
             db.session.commit()
-            # Сохраняем новый файл
             for file in uploaded_files:
                 if file and file.filename:
                     file_data = file.read()
@@ -408,25 +383,7 @@ def delete_category(category_id):
     return redirect(url_for('manage_categories'))
 
 
-# @app.route('/admin/orders')
-# def manage_orders():
-#     if 'user_id' not in session:
-#         flash('Пожалуйста, войдите в систему.', 'error')
-#         return redirect(url_for('login'))
-#
-#     user = User.query.get(session['user_id'])
-#     if not (user and user.is_admin):
-#         flash('У вас нет прав доступа.', 'error')
-#         return redirect(url_for('shop_home'))
-#
-#     # Получаем заказы с полными данными о пользователе
-#     orders = db.session.query(
-#         Order.id, Order.order_date, Order.status,
-#         User.username, User.full_name, User.phone,
-#         User.city, User.street, User.house, User.apartment, User.private_house
-#     ).join(User, User.id == Order.user_id).all()
-#
-#     return render_template('admin_orders.html', orders=orders)
+
 @app.route('/admin/orders')
 def manage_orders():
     if 'user_id' not in session:
@@ -438,21 +395,20 @@ def manage_orders():
         flash('У вас нет прав доступа.', 'error')
         return redirect(url_for('shop_home'))
 
-    # Получаем заказы с полными данными о пользователе
+
     orders_data = db.session.query(
         Order.id, Order.order_date, Order.status,
         User.username, User.full_name, User.phone,
         User.city, User.street, User.house, User.apartment, User.private_house
     ).join(User, User.id == Order.user_id).all()
 
-    # Для каждого заказа получаем товары и их цену
+
     order_items_data = {}
     for order in orders_data:
         order_items = db.session.query(
             OrderItem, Product.name, Product.price, OrderItem.quantity
         ).join(Product, Product.id == OrderItem.product_id).filter(OrderItem.order_id == order[0]).all()
 
-        # Подсчитаем общую цену для этого заказа
         total_price = sum(item[2] * item[3] for item in order_items)
         order_items_data[order[0]] = {
             'items': order_items,
@@ -474,7 +430,6 @@ def cancel_order(order_id):
 
 @app.route('/admin/orders/complete/<int:order_id>', methods=['POST'])
 def complete_order(order_id):
-    # Получаем заказ и связанные с ним данные о пользователе
     order = db.session.query(
         Order.id, Order.order_date, Order.status,
         User.username, User.full_name, User.phone,
@@ -485,9 +440,7 @@ def complete_order(order_id):
         flash('Заказ не найден.', 'error')
         return redirect(url_for('manage_orders'))
 
-    # Проверяем, если заказ в статусе "Ожидает"
     if order.status == 'pending':
-        # Обновляем статус заказа
         db.session.query(Order).filter(Order.id == order_id).update({'status': 'completed'})
         db.session.commit()
         flash('Заказ завершён', 'success')
@@ -505,38 +458,9 @@ def view_product(product_id):
     if not admin_required():
         return redirect(url_for('login'))
     product = Product.query.get_or_404(product_id)
-    # Получаем все файлы, связанные с товаром, чтобы отобразить изображение
     product_files = ProductFile.query.filter_by(product_id=product.id).all()
     return render_template('admin_product_detail.html', product=product, product_files=product_files)
 
-
-
-
-#
-# @app.route('/change-password', methods=['GET', 'POST'])
-# def change_password():
-#     if 'user_id' not in session:
-#         flash('Пожалуйста, войдите в систему.', 'error')
-#         return redirect(url_for('login'))
-#     if request.method == 'POST':
-#         # Получаем данные формы
-#         old_password = request.form.get('old_password')
-#         new_password = request.form.get('new_password')
-#         confirm_password = request.form.get('confirm_password')
-#         user = User.query.get(session['user_id'])
-#         if not user.check_password(old_password):
-#             flash('Старый пароль не верный.', 'error')
-#             return redirect(url_for('change_password'))
-#         if new_password != confirm_password:
-#             flash('Новый пароль не совпадает.', 'error')
-#             return redirect(url_for('change_password'))
-#         # Обновляем пароль (не забудьте хешировать новый пароль)
-#         user.password_hash = generate_password_hash(new_password)
-#         db.session.commit()
-#         flash('Пароль успешно изменён.', 'success')
-#         return redirect(url_for('profile'))
-#     return render_template('change_password.html')
-#
 
 @app.route('/profile/edit', methods=['GET', 'POST'])
 def edit_profile():
@@ -547,7 +471,6 @@ def edit_profile():
     if request.method == 'GET':
         return render_template('edit_profile.html', user=user)
 
-    # Обновление личных данных
     user.full_name = request.form.get('full_name', '').strip()
     user.phone = request.form.get('phone', '').strip()
     birth_date_str = request.form.get('birth_date', '').strip()
@@ -560,11 +483,10 @@ def edit_profile():
     else:
         user.birth_date = None
 
-    # Обновление адреса доставки из отдельных полей
     user.city = request.form.get('city', '').strip()
     user.street = request.form.get('street', '').strip()
     user.house = request.form.get('house', '').strip()
-    user.apartment = request.form.get('apartment', '').strip()  # может быть пустым, если private_house установлено
+    user.apartment = request.form.get('apartment', '').strip()
     user.private_house = True if request.form.get('private_house') == '1' else False
 
     db.session.commit()
@@ -574,16 +496,12 @@ def edit_profile():
 @app.route('/contacts', methods=['GET', 'POST'])
 def contacts():
     if request.method == 'POST':
-        # Получаем данные формы
         name = request.form.get('name', '').strip()
         email = request.form.get('email', '').strip()
         message_text = request.form.get('message', '').strip()
 
-        # Формируем тему сообщения, вы можете изменить логику по необходимости
         subject = f"Сообщение от {name} ({email})"
-
-        # Если пользователь авторизован, можно установить user_id, иначе оставить как None
-        user_id = session.get('user_id')  # Будет None, если пользователь не залогинен
+        user_id = session.get('user_id')
 
         new_message = Message(user_id=user_id, subject=subject, message=message_text)
         db.session.add(new_message)
@@ -599,7 +517,6 @@ def user_messages():
         flash('Пожалуйста, войдите в систему для доступа к сообщениям.', 'error')
         return redirect(url_for('login'))
     user = User.query.get(session['user_id'])
-    # Предполагаем, что сообщения пользователя хранятся в таблице messages с user_id равным идентификатору пользователя
     user_msgs = Message.query.filter_by(user_id=user.id).order_by(Message.sent_at.desc()).all()
     return render_template('messages.html', messages=user_msgs)
 
@@ -638,7 +555,6 @@ def mark_answered(message_id):
 
 @app.route('/change-password', methods=['GET', 'POST'])
 def change_password():
-    # Если пользователь не залогинен
     if 'user_id' not in session:
         flash('Пожалуйста, войдите в систему.', 'error')
         return redirect(url_for('login'))
@@ -668,10 +584,8 @@ def change_password():
 
 @app.route('/catalog')
 def catalog():
-    # Получаем категории и товары
     categories = Category.query.order_by(Category.name).all()
     products = Product.query.order_by(Product.name).all()
-    # Для каждого товара берём первое изображение (если есть)
     images = {}
     for p in products:
         img = ProductFile.query.filter_by(product_id=p.id).first()
@@ -744,10 +658,9 @@ def checkout():
     items = CartItem.query.filter_by(user_id=user.id).all()
     total = sum(item.quantity * float(item.product.price) for item in items)
 
-    # Проверяем, заполнены ли телефон и адрес
+
     missing_info = not (user.phone and user.city and user.street and user.house)
 
-    # Собираем словарь изображений для каждого товара
     images = {}
     for item in items:
         img = ProductFile.query.filter_by(product_id=item.product_id).first()
@@ -781,21 +694,6 @@ def checkout():
                            total=total,
                            missing_info=missing_info,
                            images=images)
-
-
-@app.route('/search_products', methods=['GET'])
-def search_products():
-    query = request.args.get('query', '').strip()  # Получаем строку поиска из параметра запроса
-    if query:
-        # Ищем товары по имени или описанию
-        products = db.session.query(Product).filter(
-            Product.name.ilike(f'%{query}%') | Product.description.ilike(f'%{query}%')
-        ).all()
-    else:
-        products = []
-
-    return render_template('search_results.html', products=products)
-
 
 
 if __name__ == '__main__':
