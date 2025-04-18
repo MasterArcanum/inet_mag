@@ -114,7 +114,15 @@ class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
     order_date = db.Column(db.DateTime, default=datetime.utcnow)
-    status = db.Column(db.String(50), default='pending')
+    status = db.Column(db.String(50), default='pending')  # Статус заказа: pending, completed, canceled
+    phone = db.Column(db.String(20))
+    city = db.Column(db.String(100))
+    street = db.Column(db.String(255))
+    house = db.Column(db.String(50))
+    apartment = db.Column(db.String(50))
+    private_house = db.Column(db.Boolean, default=False, nullable=False)
+
+    user = db.relationship('User', backref=db.backref('orders', lazy='dynamic'))
 
 class OrderItem(db.Model):
     __tablename__ = 'order_items'
@@ -122,6 +130,7 @@ class OrderItem(db.Model):
     order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
+    product = db.relationship('Product')
 
 
 
@@ -399,16 +408,95 @@ def delete_category(category_id):
     return redirect(url_for('manage_categories'))
 
 
+# @app.route('/admin/orders')
+# def manage_orders():
+#     if 'user_id' not in session:
+#         flash('Пожалуйста, войдите в систему.', 'error')
+#         return redirect(url_for('login'))
+#
+#     user = User.query.get(session['user_id'])
+#     if not (user and user.is_admin):
+#         flash('У вас нет прав доступа.', 'error')
+#         return redirect(url_for('shop_home'))
+#
+#     # Получаем заказы с полными данными о пользователе
+#     orders = db.session.query(
+#         Order.id, Order.order_date, Order.status,
+#         User.username, User.full_name, User.phone,
+#         User.city, User.street, User.house, User.apartment, User.private_house
+#     ).join(User, User.id == Order.user_id).all()
+#
+#     return render_template('admin_orders.html', orders=orders)
 @app.route('/admin/orders')
 def manage_orders():
     if 'user_id' not in session:
         flash('Пожалуйста, войдите в систему.', 'error')
         return redirect(url_for('login'))
+
     user = User.query.get(session['user_id'])
     if not (user and user.is_admin):
         flash('У вас нет прав доступа.', 'error')
         return redirect(url_for('shop_home'))
-    return "Страница управления заказами (заглушка)"
+
+    # Получаем заказы с полными данными о пользователе
+    orders_data = db.session.query(
+        Order.id, Order.order_date, Order.status,
+        User.username, User.full_name, User.phone,
+        User.city, User.street, User.house, User.apartment, User.private_house
+    ).join(User, User.id == Order.user_id).all()
+
+    # Для каждого заказа получаем товары и их цену
+    order_items_data = {}
+    for order in orders_data:
+        order_items = db.session.query(
+            OrderItem, Product.name, Product.price, OrderItem.quantity
+        ).join(Product, Product.id == OrderItem.product_id).filter(OrderItem.order_id == order[0]).all()
+
+        # Подсчитаем общую цену для этого заказа
+        total_price = sum(item[2] * item[3] for item in order_items)
+        order_items_data[order[0]] = {
+            'items': order_items,
+            'total_price': total_price
+        }
+
+    return render_template('admin_orders.html', orders=orders_data, order_items_data=order_items_data)
+
+
+@app.route('/admin/orders/cancel/<int:order_id>', methods=['POST'])
+def cancel_order(order_id):
+    order = Order.query.get_or_404(order_id)
+
+    order.status = 'canceled'
+    db.session.commit()
+    flash('Заказ отменен', 'info')
+    return redirect(url_for('manage_orders'))
+
+
+@app.route('/admin/orders/complete/<int:order_id>', methods=['POST'])
+def complete_order(order_id):
+    # Получаем заказ и связанные с ним данные о пользователе
+    order = db.session.query(
+        Order.id, Order.order_date, Order.status,
+        User.username, User.full_name, User.phone,
+        User.city, User.street, User.house, User.apartment, User.private_house
+    ).join(User, User.id == Order.user_id).filter(Order.id == order_id).first()
+
+    if not order:
+        flash('Заказ не найден.', 'error')
+        return redirect(url_for('manage_orders'))
+
+    # Проверяем, если заказ в статусе "Ожидает"
+    if order.status == 'pending':
+        # Обновляем статус заказа
+        db.session.query(Order).filter(Order.id == order_id).update({'status': 'completed'})
+        db.session.commit()
+        flash('Заказ завершён', 'success')
+    else:
+        flash('Невозможно завершить заказ, так как его статус уже изменен.', 'error')
+
+    return redirect(url_for('manage_orders'))
+
+
 
 
 

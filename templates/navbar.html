@@ -79,7 +79,7 @@
                class="absolute right-0 mt-2 w-48 bg-white text-gray-800 rounded-lg shadow-lg py-1">
             <a href="{{ url_for('profile') }}" class="block px-4 py-2 hover:bg-green-100">Профиль</a>
             {% if user.is_admin %}
-            <a href="{{ url_for('admin_panel') }}" class="block px-4 py-2 hover:bg-green-100">Админка</a>
+            <a href="{{ url_for('admin_panel') }}" class="block px-4 py-2 hover:bg-green-100">Панель администратора</a>
             {% endif %}
             <a href="{{ url_for('logout') }}" class="block px-4 py-2 hover:bg-green-100">Выйти</a>
           </div>
